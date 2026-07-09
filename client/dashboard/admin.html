@@ -170,9 +170,9 @@
 </div>
 
 <script>
-const API_ADMIN = "http://localhost:3000/api/admin";
-const API_FINANCING = "http://localhost:3000/api/financiamiento";
-const API_CONTRACTS = "http://localhost:3000/api/contracts";
+const API_ADMIN = "/api/admin";
+const API_FINANCING = "/api/financiamiento";
+const API_CONTRACTS = "/api/contracts";
 const token = localStorage.getItem("token");
 const user = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -1014,7 +1014,7 @@ async function confirmarRegistro() {
         return;
     }
 
-    const res = await fetch("http://localhost:3000/api/auth/register", {
+    const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre, email, password, rol })

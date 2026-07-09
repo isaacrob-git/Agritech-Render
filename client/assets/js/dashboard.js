@@ -128,7 +128,7 @@ async function createProduct(e) {
         ubicacion: ubicacion.value
     };
 
-    const res = await fetch("http://localhost:3000/api/products", {
+    const res = await fetch("/api/products", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -152,7 +152,7 @@ async function createProduct(e) {
 // MIS PRODUCTOS
 // -------------------------
 async function renderMyProducts() {
-    const res = await fetch("http://localhost:3000/api/products/me", {
+    const res = await fetch("/api/products/me", {
         headers: {
             "Authorization": "Bearer " + token
         }

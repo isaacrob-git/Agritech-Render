@@ -18,7 +18,7 @@ class="w-full p-3 border rounded mb-6">
 <div id="products" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
 
 <script>
-const API = "http://localhost:3000/api/products";
+const API = "/api/products";
 let allProducts = [];
 
 // ----------------------
@@ -98,7 +98,7 @@ async function buy(productId) {
     if (!cantidad || isNaN(cantidad)) return;
 
     try {
-        const res = await fetch("http://localhost:3000/api/orders", {
+        const res = await fetch("/api/orders", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
