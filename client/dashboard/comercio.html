@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Comercio | CosechaDirecta</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    brand_lime: '#D1F09B',
+                    brand_lime_dark: '#B8E07D',
+                    navy_dark: '#102A32',
+                    navy_deep: '#0A1F26',
+                    danger: '#EF4444'
+                },
+                fontFamily: { sans: ['Inter', 'sans-serif'] }
+            }
+        }
+    }
+</script>
+<style>
+    body { background-color: #F8FAFC; font-family: 'Inter', sans-serif; }
+    .glass-sidebar { background: rgba(16, 42, 50, 0.98); backdrop-filter: blur(10px); }
+    .custom-shadow { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
+    
+    /* Scrollbar minimalista */
+    ::-webkit-scrollbar { height: 6px; width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+</style>
+</head>
+
+<body class="text-navy_dark flex min-h-screen">
+
+<aside class="w-72 glass-sidebar text-white p-6 flex flex-col justify-between fixed h-full z-40">
+    <div>
+        <div class="mb-10 px-2">
+            <a href="../main-user.html" class="text-2xl font-black tracking-tighter leading-none">CosechaDirecta</a>
+            <p class="text-[10px] text-brand_lime font-bold uppercase tracking-widest mt-1.5 bg-white/5 py-1 px-2.5 rounded-md inline-block">Panel Comercio</p>
+        </div>
+
+        <nav class="space-y-1.5 flex-1" id="navMenu">
+            <button onclick="navigate('Dashboard')" data-target="Dashboard" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Dashboard</span>
+            </button>
+            <button onclick="navigate('Marketplace')" data-target="Marketplace" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Marketplace</span>
+            </button>
+            <button onclick="navigate('Carrito')" data-target="Carrito" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Carrito</span>
+                <span id="cartBadge" class="bg-brand_lime text-navy_dark text-[10px] font-black px-2 py-0.5 rounded-md empty:hidden shadow-sm"></span>
+            </button>
+            <button onclick="navigate('Mis pedidos')" data-target="Mis pedidos" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Mis pedidos</span>
+            </button>
+            <button onclick="navigate('Contratos')" data-target="Contratos" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Contratos</span>
+            </button>
+            <button onclick="navigate('Tokens')" data-target="Tokens" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Tokens</span>
+            </button>
+            <button onclick="navigate('Perfil')" data-target="Perfil" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Perfil</span>
+            </button>
+        </nav>
+    </div>
+
+    <div class="border-t border-white/10 pt-4 mt-6">
+        <button onclick="cerrarSesion()" class="w-full flex items-center justify-center gap-3 px-4 py-3 hover:bg-red-500/10 text-red-400 rounded-2xl transition text-sm font-bold">
+            Cerrar sesión
+        </button>
+    </div>
+</aside>
+
+<div class="flex-1 pl-72 flex flex-col min-h-screen pt-10">
+    <main class="px-10 pb-10 flex-1 max-w-7xl w-full mx-auto">
+        <div id="content" class="bg-white rounded-[32px] p-8 custom-shadow border border-gray-100 min-h-[500px]">
+            </div>
+    </main>
+</div>
+
+<script>
+const API_PRODUCTS = "http://localhost:3000/api/products";
+const API_ORDERS = "http://localhost:3000/api/orders";
+const API_CONTRACTS = "http://localhost:3000/api/contracts";
+const API_TOKENS = "http://localhost:3000/api/tokens";
+const API_USERS = "http://localhost:3000/api/auth";
+const API_URL = "http://localhost:3000/api";
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+let allProducts = [];
+
+// ======================
+// VERIFICAR SESION
+// ======================
+if (!token || !user) {
+    window.location.href = "../login.html";
+}
+
+// ======================
+// CARRITO (localStorage)
+// ======================
+function getCart() {
+    return JSON.parse(localStorage.getItem("cart") || "[]");
+}
+
+function saveCart(cart) {
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCartBadge();
+}
+
+function updateCartBadge() {
+    const badge = document.getElementById("cartBadge");
+    const cart = getCart();
+    badge.textContent = cart.length ? cart.length : "";
+}
+
+// ======================
+// NAVEGACION
+// ======================
+function navigate(section) {
+    const content = document.getElementById("content");
+    content.innerHTML = '<div class="flex justify-center items-center h-64"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand_lime"></div></div>';
+
+    // Estilos activos del Sidebar
+    const buttons = document.querySelectorAll('.nav-btn');
+    buttons.forEach(btn => {
+        if(btn.dataset.target === section) {
+            btn.className = "nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] bg-brand_lime text-navy_dark font-black shadow-lg shadow-brand_lime/10";
+        } else {
+            btn.className = "nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold";
+        }
+    });
+
+    const fns = {
+        "Dashboard": renderDashboard,
+        "Marketplace": renderMarketplace,
+        "Carrito": renderCarrito,
+        "Mis pedidos": renderMisPedidos,
+        "Contratos": renderContratos,
+        "Tokens": renderTokens,
+        "Perfil": renderPerfil
+    };
+
+    if (fns[section]) fns[section]();
+}
+
+// ======================
+// BADGES GLOBALES
+// ======================
+const badgeColorGlobal = (estado) => ({
+    pendiente: "bg-yellow-100 text-yellow-700 border border-yellow-200",
+    activo: "bg-blue-100 text-blue-700 border border-blue-200",
+    aceptado: "bg-green-100 text-green-700 border border-green-200",
+    en_produccion: "bg-indigo-100 text-indigo-700 border border-indigo-200",
+    en_transporte: "bg-purple-100 text-purple-700 border border-purple-200",
+    entregado: "bg-brand_lime text-navy_dark shadow-sm",
+    finalizado: "bg-navy_dark text-brand_lime shadow-sm",
+    rechazado: "bg-red-100 text-red-700 border border-red-200",
+    cancelado: "bg-red-100 text-red-700 border border-red-200"
+}[estado] || "bg-gray-100 text-gray-500 border border-gray-200");
+
+const badgeLabelGlobal = (estado) => ({
+    pendiente: "Pendiente",
+    activo: "Activo",
+    aceptado: "Aceptado",
+    en_produccion: "En producción",
+    en_transporte: "En transporte",
+    entregado: "Entregado",
+    finalizado: "Finalizado",
+    rechazado: "Rechazado",
+    cancelado: "Cancelado"
+}[estado] || estado);
+
+// ======================
+// DASHBOARD
+// ======================
+async function renderDashboard() {
+    let totalPedidos = 0;
+    let contratosActivos = 0;
+
+    try {
+        const resPedidos = await fetch(API_ORDERS + "/comercio", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        const pedidos = await resPedidos.json();
+        totalPedidos = pedidos.length;
+
+        const resContratos = await fetch(API_CONTRACTS + "/comercio", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        const contratos = await resContratos.json();
+        contratosActivos = contratos.filter(c => c.estado === "activo").length;
+    } catch (e) {}
+
+    const content = document.getElementById("content");
+    content.innerHTML = `
+        <div class="mb-8 border-b border-gray-100 pb-6">
+            <h2 class="text-2xl font-black mb-1">Resumen del Comercio</h2>
+            <p class="text-sm text-gray-400 font-medium">Hola <span class="font-bold text-navy_dark">${user.nombre || "Usuario"}</span>, aquí tienes un vistazo a tus operaciones.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-gray-50 border border-gray-100 p-6 rounded-[24px]">
+                <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Pedidos Realizados</p>
+                <p class="text-4xl font-black text-navy_dark">${totalPedidos}</p>
+            </div>
+            <div class="bg-brand_lime/20 border border-brand_lime/40 p-6 rounded-[24px]">
+                <p class="text-[10px] text-navy_dark font-black uppercase tracking-widest mb-2">Contratos Activos</p>
+                <p class="text-4xl font-black text-navy_dark">${contratosActivos}</p>
+            </div>
+            <div class="bg-navy_dark p-6 rounded-[24px]">
+                <p class="text-[10px] text-brand_lime font-black uppercase tracking-widest mb-2">Estado de Cuenta</p>
+                <p class="text-xl font-bold text-white mt-2">Al día</p>
+            </div>
+        </div>
+    `;
+}
+
+// ======================
+// MARKETPLACE
+// ======================
+async function renderMarketplace() {
+    const content = document.getElementById("content");
+    content.innerHTML = `
+        <div class="mb-8 border-b border-gray-100 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-black mb-1">Marketplace</h2>
+                <p class="text-sm text-gray-400 font-medium">Explora y compra productos agrícolas directamente.</p>
+            </div>
+            <div class="w-full sm:w-72">
+                <input id="searchMarket" placeholder="🔍 Buscar producto"
+                    class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 px-4 text-sm font-semibold focus:border-brand_lime outline-none transition-all">
+            </div>
+        </div>
+        <div id="marketGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    `;
+
+    try {
+        const res = await fetch(API_PRODUCTS);
+        allProducts = await res.json();
+
+        renderMarketGrid(allProducts);
+
+        document.getElementById("searchMarket").addEventListener("input", (e) => {
+            const q = e.target.value.toLowerCase();
+            const filtered = allProducts.filter(p =>
+                p.nombre.toLowerCase().includes(q) ||
+                p.ubicacion.toLowerCase().includes(q)
+            );
+            renderMarketGrid(filtered);
+        });
+
+    } catch (e) {
+        document.getElementById("marketGrid").innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl col-span-full'>Error al cargar productos</p>";
+    }
+}
+
+function renderMarketGrid(data) {
+    const grid = document.getElementById("marketGrid");
+
+    if(!data.length) {
+        grid.innerHTML = "<div class='col-span-full bg-gray-50 rounded-[20px] p-8 text-center border border-dashed border-gray-200'><p class='text-gray-400 font-bold text-sm'>No se encontraron productos.</p></div>";
+        return;
+    }
+
+    grid.innerHTML = data.map(p => `
+        <div class="bg-white p-6 rounded-[24px] border border-gray-100 custom-shadow flex flex-col justify-between hover:border-brand_lime transition-colors">
+            <div>
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="font-black text-xl text-navy_dark">${p.nombre}</h3>
+                    <span class="bg-gray-100 text-gray-500 px-2 py-1 rounded-lg text-[10px] font-black uppercase">${p.ubicacion}</span>
+                </div>
+                
+                <div class="space-y-1 mb-6">
+                    <p class="text-sm font-medium text-gray-500">Stock disponible: <span class="font-bold text-navy_dark">${p.cantidad} kg</span></p>
+                    <p class="text-sm font-medium text-gray-500">Precio: <span class="font-black text-navy_dark text-lg">$${p.precioKg}</span><span class="text-xs">/kg</span></p>
+                    <p class="text-xs font-bold mt-2 uppercase tracking-wide flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" /></svg>${p.agricultor?.nombre || "—"}</p>
+                </div>
+            </div>
+
+            <div class="flex gap-2 pt-4 border-t border-gray-50">
+                <input type="number" id="qty_${p._id}" placeholder="kg" min="1" max="${p.cantidad}"
+                    class="w-20 bg-gray-50 border border-gray-100 p-3 rounded-xl text-sm font-bold text-center focus:border-brand_lime outline-none">
+                <button onclick="addToCart('${p._id}', '${p.nombre}', ${p.precioKg}, '${p.agricultor?._id || ""}', '${p.agricultor?.nombre || ""}')"
+                    class="flex-1 bg-navy_dark text-brand_lime px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-brand_lime hover:text-navy_dark transition-all shadow-md">
+                    + Agregar
+                </button>
+            </div>
+        </div>
+    `).join("");
+}
+
+function addToCart(id, nombre, precioKg, agricultorId, agricultorNombre) {
+    const input = document.getElementById("qty_" + id);
+    const cantidad = parseInt(input?.value);
+
+    if (!cantidad || cantidad < 1) {
+        alert("Indica una cantidad válida");
+        return;
+    }
+
+    const cart = getCart();
+    cart.push({ productoId: id, nombre, cantidad, precioKg, agricultorId, agricultorNombre });
+    saveCart(cart);
+    
+    // Feedback visual rápido en el botón
+    const btn = input.nextElementSibling;
+    const originalText = btn.innerText;
+    btn.innerText = "¡Añadido!";
+    btn.classList.replace("bg-navy_dark", "bg-brand_lime");
+    btn.classList.replace("text-brand_lime", "text-navy_dark");
+    setTimeout(() => {
+        btn.innerText = originalText;
+        btn.classList.replace("bg-brand_lime", "bg-navy_dark");
+        btn.classList.replace("text-navy_dark", "text-brand_lime");
+        input.value = "";
+    }, 1000);
+}
+
+// ======================
+// CARRITO
+// ======================
+function renderCarrito() {
+    const cart = getCart();
+    const content = document.getElementById("content");
+
+    if (!cart.length) {
+        content.innerHTML = `
+            <div class="mb-8 border-b border-gray-100 pb-6">
+                <h2 class="text-2xl font-black mb-1">Tu Carrito</h2>
+            </div>
+            <div class='bg-gray-50 rounded-[24px] p-12 text-center border border-dashed border-gray-200'>
+                <p class='text-gray-400 font-bold'>Tu carrito está vacío</p>
+                <button onclick="navigate('Marketplace')" class="mt-4 bg-navy_dark text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-brand_lime hover:text-navy_dark transition-all">Ir al Marketplace</button>
+            </div>
+        `;
+        return;
+    }
+
+    content.innerHTML = `
+        <div class="mb-8 border-b border-gray-100 pb-6 flex justify-between items-center">
+            <h2 class="text-2xl font-black">Tu Carrito <span class="text-gray-400 text-lg">(${cart.length})</span></h2>
+        </div>
+        
+        <div class="bg-gray-50 border border-gray-100 p-6 rounded-[24px] mb-6">
+            <div class="space-y-4">
+                ${cart.map((item, i) => `
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 custom-shadow">
+                        <div>
+                            <p class="font-black text-lg text-navy_dark">${item.nombre}</p>
+                            <p class="text-sm font-medium text-gray-500">${item.cantidad} kg <span class="mx-2">x</span> $${item.precioKg}/kg</p>
+                            <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-wider">Agri: ${item.agricultorNombre || "—"}</p>
+                        </div>
+                        <div class="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
+                            <p class="font-black text-xl text-navy_dark">$${(item.cantidad * item.precioKg).toFixed(2)}</p>
+                            <button onclick="removeFromCart(${i})" class="text-red-400 hover:text-red-600 font-bold p-2 bg-red-50 rounded-xl transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                `).join("")}
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-6">
+                <div>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total a Pagar</p>
+                    <p class="text-3xl font-black text-navy_dark">$${cart.reduce((sum, i) => sum + i.cantidad * i.precioKg, 0).toFixed(2)}</p>
+                </div>
+                <button onclick="checkout()"
+                    class="w-full sm:w-auto bg-brand_lime text-navy_dark px-10 py-4 rounded-2xl font-black shadow-lg hover:bg-brand_lime_dark transition-all uppercase tracking-widest text-sm">
+                    Realizar Pedidos
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function removeFromCart(index) {
+    const cart = getCart();
+    cart.splice(index, 1);
+    saveCart(cart);
+    renderCarrito();
+}
+
+async function checkout() {
+    const cart = getCart();
+    if (!cart.length) return;
+
+    let errors = [];
+
+    // Pequeña animación de carga en el botón
+    const btn = event.target;
+    btn.innerText = "Procesando...";
+    btn.disabled = true;
+
+    for (const item of cart) {
+        try {
+            const res = await fetch(API_ORDERS, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify({
+                    productoId: item.productoId,
+                    cantidad: item.cantidad
+                })
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                errors.push(`${item.nombre}: ${data.message}`);
+            }
+        } catch (e) {
+            errors.push(`${item.nombre}: error de conexión`);
+        }
+    }
+
+    localStorage.removeItem("cart");
+    updateCartBadge();
+
+    if (errors.length) {
+        alert("Algunos pedidos fallaron:\n" + errors.join("\n"));
+    } else {
+        alert("Todos los pedidos se realizaron correctamente");
+    }
+
+    navigate("Mis pedidos");
+}
+
+// ======================
+// MIS PEDIDOS
+// ======================
+async function renderMisPedidos() {
+    const content = document.getElementById("content");
+    content.innerHTML = `
+        <div class="mb-8 border-b border-gray-100 pb-6">
+            <h2 class="text-2xl font-black mb-1">Mis Pedidos</h2>
+            <p class="text-sm text-gray-400 font-medium">Sigue el estado de tus compras.</p>
+        </div>
+        <div id="pedidosContainer"><div class="flex justify-center items-center h-32"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand_lime"></div></div></div>
+    `;
+
+    try {
+        const res = await fetch(API_ORDERS + "/comercio", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        const data = await res.json();
+        const pc = document.getElementById("pedidosContainer");
+
+        if (!data.length) {
+            pc.innerHTML = "<div class='bg-gray-50 rounded-[20px] p-8 text-center border border-dashed border-gray-200'><p class='text-gray-400 font-bold text-sm'>No has realizado pedidos aún.</p></div>";
+            return;
+        }
+
+        pc.innerHTML = `<div class="space-y-4">` + data.map(o => {
+            const ultimoTracking = o.viaje?.tracking?.length ? o.viaje.tracking[o.viaje.tracking.length - 1] : null;
+
+            return `
+                <div class="bg-white border border-gray-100 p-6 rounded-[24px] custom-shadow flex flex-col md:flex-row justify-between gap-6">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-3">
+                            <h3 class="font-black text-lg text-navy_dark">${o.producto?.nombre || "—"}</h3>
+                            <span class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wide ${badgeColorGlobal(o.estado)}">
+                                ${badgeLabelGlobal(o.estado)}
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-y-2 gap-x-4">
+                            <div><p class="text-[10px] font-black text-gray-400 uppercase">Cantidad</p><p class="font-bold text-sm">${o.cantidad} kg</p></div>
+                            <div><p class="text-[10px] font-black text-gray-400 uppercase">Agricultor</p><p class="font-bold text-sm">${o.agricultor?.nombre || "—"}</p></div>
+                        </div>
+
+                        ${o.viaje ? `
+                            <div class="mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-lg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6"><path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25ZM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875h.375a3 3 0 1 1 6 0h3a.75.75 0 0 0 .75-.75V15Z" /><path d="M8.25 19.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0ZM15.75 6.75a.75.75 0 0 0-.75.75v11.25c0 .087.015.17.042.248a3 3 0 0 1 5.958.464c.853-.175 1.522-.935 1.464-1.883a18.659 18.659 0 0 0-3.732-10.104 1.837 1.837 0 0 0-1.47-.725H15.75Z" /><path d="M19.5 19.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0Z" /></svg></span>
+                                    <p class="font-black text-xs text-navy_dark uppercase tracking-widest">Info de Envío</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <p><span class="font-bold text-gray-500">Viaje:</span> ${o.viaje.codigo || "—"}</p>
+                                    <p><span class="font-bold text-gray-500">Ruta:</span> ${o.viaje.origen} &rarr; ${o.viaje.destino}</p>
+                                    <p class="col-span-2"><span class="font-bold text-gray-500">Transportista:</span> ${o.viaje.transportista?.nombre || "Asignando..."}</p>
+                                </div>
+                                ${ultimoTracking ? `
+                                    <p class="text-[10px] font-bold text-brand_lime_dark bg-navy_dark px-3 py-2 rounded-lg mt-3 uppercase tracking-wider inline-block">
+                                         ${ultimoTracking.ubicacion || "Actualizado"} - ${new Date(ultimoTracking.fecha).toLocaleDateString()}
+                                    </p>
+                                ` : ""}
+                            </div>
+                        ` : ""}
+                    </div>
+                    
+                    <div class="flex flex-col justify-end">
+                        ${o.estado !== "pendiente" && o.estado !== "rechazado" ? `
+                            <button onclick="imprimirFacturaComercio('${o._id}')"
+                                class="bg-navy_dark text-white px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand_lime hover:text-navy_dark transition-all shadow-md">
+                                Factura PDF
+                            </button>
+                        ` : ""}
+                    </div>
+                </div>
+            `;
+        }).join("") + `</div>`;
+
+    } catch (e) {
+        document.getElementById("pedidosContainer").innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar pedidos</p>";
+    }
+}
+
+// ======================
+// CONTRATOS
+// ======================
+let contratoDetalleId = null;
+
+async function renderContratos() {
+    const content = document.getElementById("content");
+
+    if (contratoDetalleId) {
+        renderContratoDetalle(contratoDetalleId);
+        return;
+    }
+
+    content.innerHTML = `
+        <div class="mb-8 border-b border-gray-100 pb-6 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-black mb-1">Mis Contratos</h2>
+                <p class="text-sm text-gray-400 font-medium">Acuerdos a futuro con agricultores.</p>
+            </div>
+            <button onclick="renderNuevoContrato()" class="bg-brand_lime text-navy_dark px-5 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand_lime_dark shadow-lg transition-all">
+                + Nuevo Contrato
+            </button>
+        </div>
+        <div id="contratosContainer"><div class="flex justify-center items-center h-32"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand_lime"></div></div></div>
+    `;
+
+    try {
+        const res = await fetch(API_CONTRACTS + "/comercio", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        const data = await res.json();
+        const cc = document.getElementById("contratosContainer");
+
+        if (!data.length) {
+            cc.innerHTML = "<div class='bg-gray-50 rounded-[20px] p-8 text-center border border-dashed border-gray-200'><p class='text-gray-400 font-bold text-sm'>No tienes contratos aún. Crea tu primer contrato.</p></div>";
+            return;
+        }
+
+        cc.innerHTML = `
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/50 border-b border-gray-100">
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Código</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Producto</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Agricultor</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Volumen</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Estado</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        ${data.map(c => `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 font-black text-sm text-navy_dark">${c.codigo}</td>
+                                <td class="px-6 py-4 font-bold text-sm">${c.nombreProducto}</td>
+                                <td class="px-6 py-4 text-xs font-bold text-gray-500">${c.agricultor?.nombre || "—"}</td>
+                                <td class="px-6 py-4 text-sm font-black text-gray-600">${c.cantidadKg} kg</td>
+                                <td class="px-6 py-4">
+                                    <span class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wide ${badgeColorGlobal(c.estado)}">
+                                        ${badgeLabelGlobal(c.estado)}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right space-x-1">
+                                    <button onclick="verContrato('${c._id}')" class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">Ver</button>
+                                    <button onclick="imprimirContratoComercio('${c._id}')" class="bg-navy_dark text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-brand_lime hover:text-navy_dark transition-all">PDF</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (e) {
+        document.getElementById("contratosContainer").innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar contratos</p>";
+    }
+}
+
+function verContrato(id) {
+    contratoDetalleId = id;
+    renderContratoDetalle(id);
+}
+
+async function renderContratoDetalle(id) {
+    const content = document.getElementById("content");
+    content.innerHTML = "<div class='flex justify-center items-center h-32'><div class='animate-spin rounded-full h-8 w-8 border-b-2 border-brand_lime'></div></div>";
+
+    try {
+        const res = await fetch(API_CONTRACTS + "/" + id, {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        const c = await res.json();
+
+        content.innerHTML = `
+            <button onclick="volverContratos()" class="text-sm font-black text-gray-400 hover:text-navy_dark transition-colors mb-6 flex items-center gap-2 uppercase tracking-widest">
+                &larr; Volver
+            </button>
+
+            <div class="bg-gray-50 border border-gray-100 p-8 rounded-[24px] mb-8">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="text-3xl font-black text-navy_dark">${c.codigo}</h3>
+                        <p class="text-sm font-bold text-gray-500 mt-1 uppercase tracking-widest">${c.nombreProducto}</p>
+                    </div>
+                    <span class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wide ${badgeColorGlobal(c.estado)}">${badgeLabelGlobal(c.estado)}</span>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 bg-white p-6 rounded-2xl custom-shadow border border-gray-100 mb-6">
+                    <div><p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Cantidad</p><p class="font-black text-lg text-navy_dark mt-1">${c.cantidadKg} kg</p></div>
+                    <div><p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Precio Acordado</p><p class="font-black text-lg text-brand_lime_dark mt-1">$${c.precioAcordado}/kg</p></div>
+                    <div><p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Agricultor</p><p class="font-bold text-sm text-navy_dark mt-1">${c.agricultor?.nombre || "—"}</p></div>
+                    <div><p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Fecha Entrega</p><p class="font-bold text-sm text-navy_dark mt-1">${new Date(c.fechaEntrega).toLocaleDateString()}</p></div>
+                </div>
+
+                ${c.token ? `
+                    <div class="p-5 bg-brand_lime/20 border border-brand_lime/40 rounded-2xl mb-6">
+                        <p class="text-[10px] font-black text-navy_dark uppercase tracking-widest mb-1">🔗 Token de Garantía Asociado</p>
+                        <p class="font-black text-lg text-navy_dark">${c.token.codigo || "—"} <span class="text-sm font-medium">— ${c.token.cantidad || "—"} kg</span></p>
+                    </div>
+                ` : ""}
+
+                ${c.historial?.length ? `
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 mb-6">
+                        <h4 class="text-xs font-black text-navy_dark uppercase tracking-widest mb-4">Historial del Contrato</h4>
+                        <div class="space-y-3">
+                            ${c.historial.map(h => `
+                                <div class="flex items-center gap-3 text-sm">
+                                    <div class="w-2 h-2 rounded-full bg-brand_lime"></div>
+                                    <p class="font-bold text-gray-600">${h.accion}</p>
+                                    <p class="text-xs text-gray-400 ml-auto">${new Date(h.fecha).toLocaleString()} ${h.usuario?.nombre ? `(${h.usuario.nombre})` : ""}</p>
+                                </div>
+                            `).join("")}
+                        </div>
+                    </div>
+                ` : ""}
+
+                <div class="flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-gray-200">
+                    <button onclick="imprimirContratoComercio('${c._id}')" class="flex-1 bg-navy_dark text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand_lime hover:text-navy_dark transition-all shadow-md flex justify-center items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6"><path fill-rule="evenodd" d="M7.875 1.5C6.839 1.5 6 2.34 6 3.375v2.99c-.426.053-.851.11-1.274.174-1.454.218-2.476 1.483-2.476 2.917v6.294a3 3 0 0 0 3 3h.27l-.155 1.705A1.875 1.875 0 0 0 7.232 22.5h9.536a1.875 1.875 0 0 0 1.867-2.045l-.155-1.705h.27a3 3 0 0 0 3-3V9.456c0-1.434-1.022-2.7-2.476-2.917A48.716 48.716 0 0 0 18 6.366V3.375c0-1.036-.84-1.875-1.875-1.875h-8.25ZM16.5 6.205v-2.83A.375.375 0 0 0 16.125 3h-8.25a.375.375 0 0 0-.375.375v2.83a49.353 49.353 0 0 1 9 0Zm-.217 8.265c.178.018.317.16.333.337l.526 5.784a.375.375 0 0 1-.374.409H7.232a.375.375 0 0 1-.374-.409l.526-5.784a.373.373 0 0 1 .333-.337 41.741 41.741 0 0 1 8.566 0Zm.967-3.97a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H18a.75.75 0 0 1-.75-.75V10.5ZM15 9.75a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V10.5a.75.75 0 0 0-.75-.75H15Z" clip-rule="evenodd" /></svg>Descargar Contrato
+                    </button>
+                    ${c.estado !== "finalizado" && c.estado !== "cancelado" && c.estado !== "rechazado" ? `
+                        <button onclick="cancelarContrato('${c._id}')" class="bg-white border-2 border-red-100 text-red-500 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-50 transition-all">
+                            Cancelar Acuerdo
+                        </button>
+                    ` : ""}
+                </div>
+            </div>
+        `;
+    } catch (e) {
+        content.innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar contrato</p>";
+    }
+}
+
+function volverContratos() {
+    contratoDetalleId = null;
+    renderContratos();
+}
+
+async function cancelarContrato(id) {
+    if (!confirm("¿Estás seguro de cancelar este contrato? Esta acción es irreversible.")) return;
+
+    const res = await fetch(`${API_CONTRACTS}/${id}/cancelar`, {
+        method: "PUT",
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (!res.ok) {
+        const data = await res.json();
+        alert(data.message);
+        return;
+    }
+
+    renderContratoDetalle(id);
+}
+
+async function renderNuevoContrato() {
+    const content = document.getElementById("content");
+
+    let agricultores = [];
+    try {
+        const res = await fetch(API_USERS + "/agricultores");
+        agricultores = await res.json();
+    } catch (e) {}
+
+    content.innerHTML = `
+        <button onclick="volverContratos()" class="text-sm font-black text-gray-400 hover:text-navy_dark transition-colors mb-6 flex items-center gap-2 uppercase tracking-widest">
+            &larr; Volver
+        </button>
+
+        <div class="max-w-2xl mx-auto">
+            <div class="mb-8 border-b border-gray-100 pb-6">
+                <h2 class="text-2xl font-black mb-1">Crear Nuevo Contrato</h2>
+                <p class="text-sm text-gray-400 font-medium">Establece las condiciones de compra futura.</p>
+            </div>
+
+            <form id="formContrato" class="bg-gray-50 p-8 rounded-[24px] border border-gray-100 space-y-5">
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block">Nombre del Producto</label>
+                    <input type="text" id="fcProducto" required class="w-full bg-white border border-gray-100 rounded-2xl py-3 px-4 focus:border-brand_lime outline-none font-bold text-navy_dark">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block">Seleccionar Agricultor</label>
+                    <select id="fcAgricultor" required class="w-full bg-white border border-gray-100 rounded-2xl py-3 px-4 focus:border-brand_lime outline-none font-bold text-navy_dark">
+                        <option value="">Selecciona una contraparte...</option>
+                        ${agricultores.map(a => `
+                            <option value="${a._id}">${a.codigo || "—"} — ${a.nombre}</option>
+                        `).join("")}
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block">Volumen (kg)</label>
+                        <input type="number" id="fcCantidad" min="1" required class="w-full bg-white border border-gray-100 rounded-2xl py-3 px-4 focus:border-brand_lime outline-none font-bold text-navy_dark">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block">Precio ($/kg)</label>
+                        <input type="number" id="fcPrecio" min="0.01" step="0.01" required class="w-full bg-white border border-gray-100 rounded-2xl py-3 px-4 focus:border-brand_lime outline-none font-bold text-navy_dark">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block">Fecha Límite de Entrega</label>
+                    <input type="date" id="fcFecha" required class="w-full bg-white border border-gray-100 rounded-2xl py-3 px-4 focus:border-brand_lime outline-none font-bold text-navy_dark">
+                </div>
+
+                <div class="pt-6 mt-4 border-t border-gray-200">
+                    <button type="submit" class="w-full bg-brand_lime text-navy_dark py-4 rounded-2xl font-black shadow-lg hover:bg-brand_lime_dark transition-all uppercase tracking-widest text-sm">
+                        Proponer Contrato
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.getElementById("formContrato").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.innerText = "Procesando...";
+        btn.disabled = true;
+
+        const body = {
+            agricultorId: document.getElementById("fcAgricultor").value,
+            nombreProducto: document.getElementById("fcProducto").value.trim(),
+            cantidadKg: parseInt(document.getElementById("fcCantidad").value),
+            precioAcordado: parseFloat(document.getElementById("fcPrecio").value),
+            fechaEntrega: document.getElementById("fcFecha").value
+        };
+
+        const res = await fetch(API_CONTRACTS, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.message);
+            btn.innerText = "Proponer Contrato";
+            btn.disabled = false;
+            return;
+        }
+
+        alert("Contrato propuesto con éxito: " + data.codigo + ".\nEspera la respuesta del agricultor.");
+        volverContratos();
+    });
+}
+
+// ======================
+// TOKENS
+// ======================
+async function renderTokens() {
+    const content = document.getElementById("content");
+    content.innerHTML = `
+        <div class="mb-8 border-b border-gray-100 pb-6">
+            <h2 class="text-2xl font-black mb-1">Mercado de Tokens</h2>
+            <p class="text-sm text-gray-400 font-medium">Invierte en activos agrícolas tokenizados.</p>
+        </div>
+        <div id="tokensContainer"><div class="flex justify-center items-center h-32"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand_lime"></div></div></div>
+    `;
+
+    try {
+        const [resDisponibles, resMios] = await Promise.all([
+            fetch(API_TOKENS),
+            fetch(API_TOKENS + "/mis-tokens", {
+                headers: { "Authorization": "Bearer " + token }
+            })
+        ]);
+
+        const disponibles = await resDisponibles.json();
+        const mios = await resMios.json();
+        const tc = document.getElementById("tokensContainer");
+
+        tc.innerHTML = `
+            <div class="mb-12">
+                <h3 class="text-lg font-black uppercase tracking-widest text-navy_dark mb-6">Tokens Disponibles <span class="bg-brand_lime text-navy_dark px-2 py-0.5 rounded-md ml-2 text-xs">${disponibles.length}</span></h3>
+                ${disponibles.length ? `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        ${disponibles.map(t => `
+                            <div class="bg-brand_lime/10 border border-brand_lime/30 p-6 rounded-[24px] hover:border-brand_lime transition-all">
+                                <div class="flex justify-between items-start mb-4">
+                                    <p class="font-black text-xl text-navy_dark">${t.codigo}</p>
+                                    <span class="bg-brand_lime text-navy_dark px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest">${t.estado}</span>
+                                </div>
+                                <div class="space-y-1 mb-4">
+                                    <p class="text-[10px] font-bold text-gray-500 uppercase">Activo Respaldado</p>
+                                    <p class="font-bold text-navy_dark">${t.nombreActivo}</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 mb-4">
+                                    <div><p class="text-[10px] font-bold text-gray-500 uppercase">Volumen</p><p class="font-black">${t.cantidad} ${t.unidad}</p></div>
+                                    <div><p class="text-[10px] font-bold text-gray-500 uppercase">Emisor</p><p class="font-bold text-sm truncate" title="${t.propietario?.nombre || "—"}">${t.propietario?.nombre || "—"}</p></div>
+                                </div>
+                            </div>
+                        `).join("")}
+                    </div>
+                ` : "<div class='bg-gray-50 rounded-[20px] p-8 text-center border border-dashed border-gray-200'><p class='text-gray-400 font-bold text-sm'>No hay tokens en el mercado en este momento.</p></div>"}
+            </div>
+
+            <div>
+                <h3 class="text-lg font-black uppercase tracking-widest text-navy_dark mb-6">Mi Billetera <span class="bg-navy_dark text-white px-2 py-0.5 rounded-md ml-2 text-xs">${mios.length}</span></h3>
+                ${mios.length ? `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        ${mios.map(t => `
+                            <div class="bg-white border border-gray-100 p-6 rounded-[24px] custom-shadow">
+                                <div class="flex justify-between items-start mb-4">
+                                    <p class="font-black text-xl text-navy_dark">${t.codigo}</p>
+                                    <span class="bg-navy_dark text-white px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest">En Propiedad</span>
+                                </div>
+                                <div class="space-y-1 mb-4">
+                                    <p class="text-[10px] font-bold text-gray-400 uppercase">Activo</p>
+                                    <p class="font-bold text-navy_dark">${t.nombreActivo}</p>
+                                </div>
+                                <div><p class="text-[10px] font-bold text-gray-400 uppercase">Cantidad Amparada</p><p class="font-black text-lg">${t.cantidad} ${t.unidad}</p></div>
+                            </div>
+                        `).join("")}
+                    </div>
+                ` : "<div class='bg-gray-50 rounded-[20px] p-8 text-center border border-dashed border-gray-200'><p class='text-gray-400 font-bold text-sm'>No posees tokens en tu billetera.</p></div>"}
+            </div>
+        `;
+
+    } catch (e) {
+        document.getElementById("tokensContainer").innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar tokens</p>";
+    }
+}
+
+// ======================
+// PERFIL
+// ======================
+function renderPerfil() {
+    const content = document.getElementById("content");
+    const initials = (user.nombre || "Comercio").split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+
+    content.innerHTML = `
+        <div class="mb-8 border-b border-gray-100 pb-6 flex items-center gap-6">
+            <div class="w-20 h-20 bg-brand_lime rounded-3xl flex items-center justify-center text-3xl font-black text-navy_dark">
+                ${initials}
+            </div>
+            <div>
+                <h2 class="text-3xl font-black text-navy_dark">${user.nombre || "Cargando..."}</h2>
+                <p class="text-xs text-gray-400 font-black uppercase tracking-widest mt-1">Rol: ${user.rol || "Comercio"}</p>
+            </div>
+        </div>
+        
+        <div class="bg-gray-50 border border-gray-100 p-8 rounded-[24px] max-w-lg space-y-6">
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Código Único</p>
+                <p class="font-bold text-navy_dark bg-white py-3 px-4 rounded-xl border border-gray-200">${user.codigo || "—"}</p>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Correo Electrónico</p>
+                <p class="font-bold text-navy_dark bg-white py-3 px-4 rounded-xl border border-gray-200">${user.email || "—"}</p>
+            </div>
+        </div>
+    `;
+}
+
+// ======================
+// PDF (Sin cambios lógicos, estilos estandarizados Neo-brutalist)
+// ======================
+function printDocument(titulo, bodyHtml) {
+    const userData = JSON.parse(localStorage.getItem("user") || "{}");
+    const now = new Date().toLocaleString();
+
+    const css = `
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', Arial, sans-serif; color: #102A32; padding: 40px; }
+        .header { text-align: center; border-bottom: 3px solid #102A32; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { color: #102A32; font-size: 28px; font-weight: 900; }
+        .header p { color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px;}
+        .doc-title { font-size: 18px; font-weight: 900; text-align: center; margin-bottom: 25px; color: #102A32; text-transform: uppercase; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-weight: 900; font-size: 12px; color: #102A32; border-bottom: 2px solid #D1F09B; padding-bottom: 5px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;}
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        td, th { padding: 10px 12px; text-align: left; font-size: 12px; border-bottom: 1px solid #eee;}
+        th { background: #f8fafc; color: #102A32; font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; }
+        .row-label { font-weight: 900; color: #666; width: 140px; }
+        .total-row td { font-weight: 900; font-size: 14px; border-top: 2px solid #102A32; }
+        .firma { margin-top: 60px; display: flex; justify-content: space-between; }
+        .firma div { text-align: center; width: 200px; }
+        .firma .line { border-top: 2px solid #102A32; margin-top: 40px; padding-top: 5px; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+        .footer { margin-top: 40px; text-align: center; font-size: 10px; color: #999; border-top: 1px solid #eee; padding-top: 15px; font-weight: 600;}
+    </style>`;
+
+    const win = window.open("", "_blank");
+    win.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="UTF-8"><title>${titulo}</title>${css}</head>
+        <body>
+            <div class="header">
+                <h1>CosechaDirecta</h1>
+                <p>Plataforma de Comercio Agrícola</p>
+            </div>
+            <div class="doc-title">${titulo}</div>
+            ${bodyHtml}
+            <div class="footer">
+                <p>Documento generado el ${now} por ${userData.nombre || "—"} (${userData.codigo || "—"})</p>
+                <p>CosechaDirecta &copy; ${new Date().getFullYear()}</p>
+            </div>
+        </body>
+        </html>
+    `);
+    win.document.close();
+
+    setTimeout(() => {
+        win.focus();
+        win.print();
+    }, 300);
+}
+
+// ---------- Factura Pedido (Comercio) ----------
+function imprimirFacturaComercio(orderId) {
+    fetch(API_ORDERS + "/comercio", {
+        headers: { "Authorization": "Bearer " + token }
+    })
+    .then(r => r.json())
+    .then(orders => {
+        const o = orders.find(x => x._id === orderId);
+        if (!o) { alert("Pedido no encontrado"); return; }
+
+        const userData = JSON.parse(localStorage.getItem("user") || "{}");
+        const total = o.cantidad * (o.producto?.precioKg || 0);
+        
+        const badgeBg = o.estado === "entregado" ? "#102A32"
+            : o.estado === "rechazado" ? "#EF4444"
+            : o.estado === "pendiente" ? "#eab308"
+            : o.estado === "en_transporte" ? "#3b82f6"
+            : "#D1F09B";
+        const badgeText = o.estado === "aceptado" ? "#102A32" : "#fff";
+
+        const body = `
+            <div class="section">
+                <table>
+                    <tr><td class="row-label">No. Factura:</td><td><b>FAC-${o._id.slice(-6).toUpperCase()}</b></td></tr>
+                    <tr><td class="row-label">Fecha:</td><td>${new Date(o.createdAt || o._id?.getTimestamp?.()).toLocaleDateString() || new Date().toLocaleDateString()}</td></tr>
+                    <tr><td class="row-label">Estado:</td><td><span style="background:${badgeBg};color:${badgeText};padding:4px 10px;border-radius:6px;font-size:10px;font-weight:900;text-transform:uppercase;">${o.estado}</span></td></tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Partes</div>
+                <table>
+                    <tr><td class="row-label">Comprador:</td><td>${userData.nombre || "—"} (${userData.codigo || "—"})</td></tr>
+                    <tr><td class="row-label">Vendedor:</td><td>${o.agricultor?.nombre || "—"}</td></tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Detalle</div>
+                <table>
+                    <tr><th>Producto</th><th>Cantidad</th><th>Precio/kg</th><th>Subtotal</th></tr>
+                    <tr>
+                        <td><b>${o.producto?.nombre || "—"}</b></td>
+                        <td>${o.cantidad} kg</td>
+                        <td>$${o.producto?.precioKg || 0}</td>
+                        <td>$${total.toFixed(2)}</td>
+                    </tr>
+                    <tr class="total-row"><td colspan="3">TOTAL</td><td>$${total.toFixed(2)}</td></tr>
+                </table>
+            </div>
+
+            ${o.viaje ? `
+            <div class="section">
+                <div class="section-title">Transporte</div>
+                <table>
+                    <tr><td class="row-label">Viaje:</td><td>${o.viaje.codigo || "—"}</td></tr>
+                    <tr><td class="row-label">Ruta:</td><td>${o.viaje.origen || "—"} → ${o.viaje.destino || "—"}</td></tr>
+                    <tr><td class="row-label">Transportista:</td><td>${o.viaje.transportista?.nombre || "Pendiente"}</td></tr>
+                    <tr><td class="row-label">Estado Transporte:</td><td><b>${o.viaje.estado || "—"}</b></td></tr>
+                </table>
+            </div>` : ""}
+
+            <div class="firma">
+                <div><div class="line">Firma Comprador</div></div>
+                <div><div class="line">Firma Vendedor</div></div>
+            </div>
+        `;
+
+        printDocument("Factura de Compra", body);
+    });
+}
+
+// ---------- Contrato (Comercio) ----------
+function imprimirContratoComercio(contractId) {
+    fetch(API_CONTRACTS + "/" + contractId, {
+        headers: { "Authorization": "Bearer " + token }
+    })
+    .then(r => r.json())
+    .then(c => {
+        const userData = JSON.parse(localStorage.getItem("user") || "{}");
+        const total = c.cantidadKg * c.precioAcordado;
+        
+        const badgeBg = c.estado === "entregado" || c.estado === "finalizado" ? "#102A32"
+            : c.estado === "cancelado" || c.estado === "rechazado" ? "#EF4444"
+            : c.estado === "pendiente" ? "#eab308"
+            : c.estado === "en_transporte" || c.estado === "en_produccion" ? "#3b82f6"
+            : "#D1F09B";
+        const badgeText = c.estado === "activo" ? "#102A32" : "#fff";
+
+        const body = `
+            <div class="section">
+                <table>
+                    <tr><td class="row-label">No. Contrato:</td><td><b>${c.codigo}</b></td></tr>
+                    <tr><td class="row-label">Fecha Creación:</td><td>${new Date(c.createdAt || c._id?.getTimestamp?.()).toLocaleDateString() || new Date().toLocaleDateString()}</td></tr>
+                    <tr><td class="row-label">Estado:</td><td><span style="background:${badgeBg};color:${badgeText};padding:4px 10px;border-radius:6px;font-size:10px;font-weight:900;text-transform:uppercase;">${c.estado}</span></td></tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Partes Involucradas</div>
+                <table>
+                    <tr><td class="row-label">Comprador:</td><td>${userData.nombre || "—"} (${userData.codigo || "—"})</td></tr>
+                    <tr><td class="row-label">Vendedor:</td><td>${c.agricultor?.nombre || "—"}</td></tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Detalle del Acuerdo</div>
+                <table>
+                    <tr><td class="row-label">Producto:</td><td><b>${c.nombreProducto}</b></td></tr>
+                    <tr><td class="row-label">Volumen Acordado:</td><td>${c.cantidadKg} kg</td></tr>
+                    <tr><td class="row-label">Precio Fijado:</td><td>$${c.precioAcordado}/kg</td></tr>
+                    <tr class="total-row"><td>Total Estimado:</td><td>$${total.toFixed(2)}</td></tr>
+                    <tr><td class="row-label">Fecha Límite:</td><td>${new Date(c.fechaEntrega).toLocaleDateString()}</td></tr>
+                </table>
+            </div>
+
+            ${c.token ? `
+            <div class="section">
+                <div class="section-title">Token Asociado</div>
+                <table>
+                    <tr><td class="row-label">Código del Token:</td><td><b>${c.token.codigo || "—"}</b></td></tr>
+                    <tr><td class="row-label">Garantía Amparada:</td><td>${c.token.cantidad || "—"} kg</td></tr>
+                </table>
+            </div>` : ""}
+
+            ${c.historial?.length ? `
+            <div class="section">
+                <div class="section-title">Registro de Eventos</div>
+                <table>
+                    <tr><th>Fecha</th><th>Acción Registrada</th></tr>
+                    ${c.historial.map(h => `
+                        <tr><td>${new Date(h.fecha).toLocaleString()}</td><td>${h.accion}</td></tr>
+                    `).join("")}
+                </table>
+            </div>` : ""}
+
+            <div class="firma">
+                <div><div class="line">Firma Comprador</div></div>
+                <div><div class="line">Firma Vendedor</div></div>
+            </div>
+        `;
+
+        printDocument("Contrato de Compraventa a Futuro", body);
+    });
+}
+
+// ======================
+// CERRAR SESION
+// ======================
+function cerrarSesion() {
+    localStorage.clear();
+    window.location.href = "../index.html";
+}
+
+// ======================
+// INIT
+// ======================
+updateCartBadge();
+navigate("Dashboard");
+</script>
+
+</body>
+</html>

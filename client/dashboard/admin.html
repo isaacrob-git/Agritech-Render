@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Administrador | CosechaDirecta</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    brand_lime: '#D1F09B',
+                    brand_lime_dark: '#B8E07D',
+                    navy_dark: '#102A32',
+                    navy_deep: '#0A1F26',
+                    danger: '#EF4444'
+                },
+                fontFamily: { sans: ['Inter', 'sans-serif'] }
+            }
+        }
+    }
+</script>
+<style>
+    body { background-color: #F8FAFC; font-family: 'Inter', sans-serif; }
+    .glass-sidebar { background: rgba(16, 42, 50, 0.98); backdrop-filter: blur(10px); }
+    .custom-shadow { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
+    ::-webkit-scrollbar { height: 6px; width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+</style>
+</head>
+<body class="text-navy_dark flex min-h-screen">
+
+<!-- SIDEBAR -->
+<aside class="w-72 glass-sidebar text-white p-6 flex flex-col justify-between fixed h-full z-40">
+    <div>
+        <div class="mb-10 px-2">
+            <a href="../main-user.html" class="text-2xl font-black tracking-tighter leading-none">CosechaDirecta</a>
+            <p class="text-[10px] text-brand_lime font-bold uppercase tracking-widest mt-1.5 bg-white/5 py-1 px-2.5 rounded-md inline-block">Panel Administrador</p>
+        </div>
+
+        <nav class="space-y-1.5 flex-1" id="navMenu">
+            <button onclick="navigate('Dashboard')" data-target="Dashboard" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Dashboard</span>
+            </button>
+            <button onclick="navigate('Usuarios')" data-target="Usuarios" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Usuarios</span>
+            </button>
+            <button onclick="navigate('Productos')" data-target="Productos" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Productos</span>
+            </button>
+            <button onclick="navigate('Pedidos')" data-target="Pedidos" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Pedidos</span>
+            </button>
+            <button onclick="navigate('Contratos')" data-target="Contratos" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Contratos</span>
+            </button>
+            <button onclick="navigate('Tokens')" data-target="Tokens" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Tokens</span>
+            </button>
+            <button onclick="navigate('Viajes')" data-target="Viajes" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Viajes</span>
+            </button>
+            <button onclick="navigate('Financiamientos')" data-target="Financiamientos" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Financiamientos</span>
+            </button>
+            <button onclick="navigate('Perfil')" data-target="Perfil" class="nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold">
+                <span class="flex items-center gap-3">Perfil</span>
+            </button>
+        </nav>
+    </div>
+
+    <div class="border-t border-white/10 pt-4 mt-6">
+        <button onclick="cerrarSesion()" class="w-full flex items-center justify-center gap-3 px-4 py-3 hover:bg-red-500/10 text-red-400 rounded-2xl transition text-sm font-bold">Cerrar sesión</button>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="flex-1 pl-72 flex flex-col min-h-screen pt-10">
+    <main class="px-10 pb-10 flex-1 max-w-7xl w-full mx-auto">
+        <div id="content" class="bg-white rounded-[32px] p-8 custom-shadow border border-gray-100 min-h-[500px]"></div>
+    </main>
+</div>
+
+<!-- MODAL REGISTRAR USUARIO -->
+<div id="registroModal" class="fixed inset-0 bg-navy_dark/80 backdrop-blur-sm flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-[40px] w-full max-w-md custom-shadow scale-95 transition-transform">
+        <h3 class="font-black text-xl text-navy_dark mb-6">Registrar nuevo usuario</h3>
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nombre</label>
+                <input type="text" id="regNombre" class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 px-4 focus:border-brand_lime outline-none font-bold text-navy_dark" placeholder="Nombre completo">
+            </div>
+            <div>
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Email</label>
+                <input type="email" id="regEmail" class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 px-4 focus:border-brand_lime outline-none font-bold text-navy_dark" placeholder="correo@ejemplo.com">
+            </div>
+            <div>
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Contraseña</label>
+                <input type="password" id="regPassword" class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 px-4 focus:border-brand_lime outline-none font-bold text-navy_dark" placeholder="••••••••">
+            </div>
+            <div>
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Rol</label>
+                <select id="regRol" class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 px-4 focus:border-brand_lime outline-none font-bold text-navy_dark">
+                    <option value="agricultor">Agricultor</option>
+                    <option value="comercio">Comercio</option>
+                    <option value="transportista">Transportista</option>
+                    <option value="admin">Administrador</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex justify-end gap-3 mt-8">
+            <button onclick="cerrarModalRegistro()" class="flex-1 py-4 font-bold text-gray-400 hover:text-navy_dark transition-all">Cancelar</button>
+            <button onclick="confirmarRegistro()" class="bg-brand_lime text-navy_dark px-8 py-4 rounded-2xl font-black shadow-lg hover:bg-brand_lime_dark transition-all">Crear Usuario</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div id="editModal" class="fixed inset-0 bg-navy_dark/80 backdrop-blur-sm flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-[40px] w-full max-w-md custom-shadow scale-95 transition-transform">
+        <h3 id="editTitulo" class="font-black text-xl text-navy_dark mb-6">Editar</h3>
+        <div id="editBody" class="space-y-4"></div>
+        <div class="flex justify-end gap-3 mt-8">
+            <button onclick="cerrarModalEditar()" class="flex-1 py-4 font-bold text-gray-400 hover:text-navy_dark transition-all">Cancelar</button>
+            <button onclick="confirmarEditar()" class="bg-brand_lime text-navy_dark px-8 py-4 rounded-2xl font-black shadow-lg hover:bg-brand_lime_dark transition-all">Guardar Cambios</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ELIMINAR -->
+<div id="deleteModal" class="fixed inset-0 bg-navy_dark/80 backdrop-blur-sm flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-[40px] w-full max-w-md custom-shadow scale-95 transition-transform">
+        <h3 class="font-black text-xl text-navy_dark mb-6">Confirmar eliminación</h3>
+        <p id="deleteMsg" class="mb-4 text-sm font-bold"></p>
+        <div id="deleteWarning" class="mb-4 hidden"></div>
+        <label class="flex items-center gap-3 text-sm font-bold text-gray-500 cursor-pointer">
+            <input type="checkbox" id="deleteCheck" onchange="toggleDeleteBtn()" class="w-5 h-5 rounded border-gray-300 accent-red-500">
+            Entiendo que esto no se puede deshacer
+        </label>
+        <div class="flex justify-end gap-3 mt-8">
+            <button onclick="cerrarModalEliminar()" class="flex-1 py-4 font-bold text-gray-400 hover:text-navy_dark transition-all">Cancelar</button>
+            <button id="deleteBtn" onclick="confirmarEliminar()" class="bg-red-50 text-red-500 px-8 py-4 rounded-2xl font-black transition-all disabled:opacity-30" disabled>Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CAMBIAR CONTRASEÑA -->
+<div id="passwordModal" class="fixed inset-0 bg-navy_dark/80 backdrop-blur-sm flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-[40px] w-full max-w-md custom-shadow scale-95 transition-transform">
+        <h3 id="passTitulo" class="font-black text-xl text-navy_dark mb-6">Cambiar contraseña</h3>
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nueva contraseña</label>
+                <input type="password" id="passNew" class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 px-4 focus:border-brand_lime outline-none font-bold text-navy_dark" placeholder="Mínimo 4 caracteres">
+            </div>
+            <div>
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Confirmar contraseña</label>
+                <input type="password" id="passConfirm" class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 px-4 focus:border-brand_lime outline-none font-bold text-navy_dark" placeholder="Repite la contraseña">
+            </div>
+        </div>
+        <div class="flex justify-end gap-3 mt-8">
+            <button onclick="cerrarModalPassword()" class="flex-1 py-4 font-bold text-gray-400 hover:text-navy_dark transition-all">Cancelar</button>
+            <button onclick="confirmarPassword()" class="bg-brand_lime text-navy_dark px-8 py-4 rounded-2xl font-black shadow-lg hover:bg-brand_lime_dark transition-all">Cambiar Contraseña</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_ADMIN = "http://localhost:3000/api/admin";
+const API_FINANCING = "http://localhost:3000/api/financiamiento";
+const API_CONTRACTS = "http://localhost:3000/api/contracts";
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+if (!token || !user) window.location.href = "../login.html";
+
+// ======================
+// BADGES GLOBALES
+// ======================
+const badgeColorGlobal = (estado) => ({
+    pendiente: "bg-yellow-100 text-yellow-700 border border-yellow-200",
+    activo: "bg-blue-100 text-blue-700 border border-blue-200",
+    asignado: "bg-blue-100 text-blue-700 border border-blue-200",
+    aceptado: "bg-green-100 text-green-700 border border-green-200",
+    aprobado: "bg-green-100 text-green-700 border border-green-200",
+    pagado: "bg-blue-100 text-blue-700 border border-blue-200",
+    en_produccion: "bg-indigo-100 text-indigo-700 border border-indigo-200",
+    en_transporte: "bg-purple-100 text-purple-700 border border-purple-200",
+    en_camino: "bg-purple-100 text-purple-700 border border-purple-200",
+    carga_recogida: "bg-indigo-100 text-indigo-700 border border-indigo-200",
+    "llegó_a_destino": "bg-brand_lime text-navy_dark shadow-sm",
+    entregado: "bg-brand_lime text-navy_dark shadow-sm",
+    finalizado: "bg-navy_dark text-brand_lime shadow-sm",
+    rechazado: "bg-red-100 text-red-700 border border-red-200",
+    cancelado: "bg-red-100 text-red-700 border border-red-200",
+    disponible: "bg-green-100 text-green-700 border border-green-200",
+    Disponible: "bg-green-100 text-green-700 border border-green-200",
+    Vendido: "bg-blue-100 text-blue-700 border border-blue-200",
+    Transferido: "bg-yellow-100 text-yellow-700 border border-yellow-200",
+    Dividido: "bg-purple-100 text-purple-700 border border-purple-200",
+    admin: "bg-red-100 text-red-700 border border-red-200",
+    agricultor: "bg-green-100 text-green-700 border border-green-200",
+    comercio: "bg-blue-100 text-blue-700 border border-blue-200",
+    transportista: "bg-purple-100 text-purple-700 border border-purple-200",
+    inactivo: "bg-gray-100 text-gray-500 border border-gray-200"
+}[estado] || "bg-gray-100 text-gray-500 border border-gray-200");
+
+const badgeLabelGlobal = (estado) => ({
+    pendiente: "Pendiente", activo: "Activo", asignado: "Asignado",
+    aceptado: "Aceptado", aprobado: "Aprobado", pagado: "Pagado",
+    en_produccion: "En producción", en_transporte: "En transporte",
+    en_camino: "En camino", carga_recogida: "Carga recogida",
+    "llegó_a_destino": "En Destino", entregado: "Entregado",
+    finalizado: "Finalizado", rechazado: "Rechazado", cancelado: "Cancelado",
+    disponible: "Disponible", Disponible: "Disponible",
+    Vendido: "Vendido", Transferido: "Transferido", Dividido: "Dividido"
+}[estado] || estado);
+
+// ======================
+// NAVEGACIÓN
+// ======================
+const views = {
+    Dashboard: renderDashboard, Usuarios: renderUsuarios, Productos: renderProductos,
+    Pedidos: renderPedidos, Contratos: renderContratos, Tokens: renderTokens,
+    Viajes: renderViajes, Financiamientos: renderFinanciamientos, Perfil: renderPerfil
+};
+
+function navigate(name) {
+    document.getElementById("content").innerHTML = '<div class="flex justify-center items-center h-64"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand_lime"></div></div>';
+
+    const buttons = document.querySelectorAll('.nav-btn');
+    buttons.forEach(btn => {
+        if (btn.dataset.target === name) {
+            btn.className = "nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] bg-brand_lime text-navy_dark font-black shadow-lg shadow-brand_lime/10";
+        } else {
+            btn.className = "nav-btn w-full flex justify-between items-center px-4 py-3 rounded-2xl text-sm transition-all uppercase tracking-wider text-[11px] text-white/70 hover:bg-white/5 hover:text-white font-semibold";
+        }
+    });
+
+    if (views[name]) views[name]();
+}
+
+// ======================
+// DASHBOARD
+// ======================
+async function renderDashboard() {
+    const c = document.getElementById("content");
+
+    try {
+        const [usuarios, productos, pedidos, contratos, tokens, viajes, financs] = await Promise.all([
+            fetch(API_ADMIN + "/usuarios", { headers: { Authorization: "Bearer " + token } }).then(r => r.json()),
+            fetch(API_ADMIN + "/productos", { headers: { Authorization: "Bearer " + token } }).then(r => r.json()),
+            fetch(API_ADMIN + "/pedidos", { headers: { Authorization: "Bearer " + token } }).then(r => r.json()),
+            fetch(API_ADMIN + "/contratos", { headers: { Authorization: "Bearer " + token } }).then(r => r.json()),
+            fetch(API_ADMIN + "/tokens", { headers: { Authorization: "Bearer " + token } }).then(r => r.json()),
+            fetch(API_ADMIN + "/viajes", { headers: { Authorization: "Bearer " + token } }).then(r => r.json()),
+            fetch(API_FINANCING + "/pendientes", { headers: { Authorization: "Bearer " + token } }).then(r => r.json()).catch(() => [])
+        ]);
+
+        const len = (a) => (Array.isArray(a) ? a.length : 0);
+
+        c.innerHTML = `
+            <div class="mb-8 border-b border-gray-100 pb-6">
+                <h2 class="text-2xl font-black mb-1">Dashboard</h2>
+                <p class="text-sm text-gray-400 font-medium">Bienvenido, ${user.nombre || "Admin"} — resumen general de la plataforma.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-gray-50 border border-gray-100 p-6 rounded-[24px]">
+                    <p class="text-[10px] text-blue-600 font-black uppercase tracking-widest mb-2">Usuarios</p>
+                    <p class="text-4xl font-black text-navy_dark">${len(usuarios)}</p>
+                </div>
+                <div class="bg-gray-50 border border-gray-100 p-6 rounded-[24px]">
+                    <p class="text-[10px] text-green-600 font-black uppercase tracking-widest mb-2">Productos</p>
+                    <p class="text-4xl font-black text-navy_dark">${len(productos)}</p>
+                </div>
+                <div class="bg-gray-50 border border-gray-100 p-6 rounded-[24px]">
+                    <p class="text-[10px] text-yellow-600 font-black uppercase tracking-widest mb-2">Pedidos</p>
+                    <p class="text-4xl font-black text-navy_dark">${len(pedidos)}</p>
+                </div>
+                <div class="bg-gray-50 border border-gray-100 p-6 rounded-[24px]">
+                    <p class="text-[10px] text-indigo-600 font-black uppercase tracking-widest mb-2">Contratos</p>
+                    <p class="text-4xl font-black text-navy_dark">${len(contratos)}</p>
+                </div>
+                <div class="bg-gray-50 border border-gray-100 p-6 rounded-[24px]">
+                    <p class="text-[10px] text-purple-600 font-black uppercase tracking-widest mb-2">Tokens</p>
+                    <p class="text-4xl font-black text-navy_dark">${len(tokens)}</p>
+                </div>
+                <div class="bg-gray-50 border border-gray-100 p-6 rounded-[24px]">
+                    <p class="text-[10px] text-orange-600 font-black uppercase tracking-widest mb-2">Viajes</p>
+                    <p class="text-4xl font-black text-navy_dark">${len(viajes)}</p>
+                </div>
+                <div class="bg-gray-50 border border-gray-100 p-6 rounded-[24px]">
+                    <p class="text-[10px] text-red-600 font-black uppercase tracking-widest mb-2">Financ. Pendientes</p>
+                    <p class="text-4xl font-black text-navy_dark">${len(financs)}</p>
+                </div>
+            </div>
+        `;
+    } catch (e) {
+        c.innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar dashboard</p>";
+    }
+}
+
+// ======================
+// USUARIOS
+// ======================
+async function renderUsuarios() {
+    const c = document.getElementById("content");
+
+    try {
+        const res = await fetch(API_ADMIN + "/usuarios", { headers: { Authorization: "Bearer " + token } });
+        const data = await res.json();
+
+        c.innerHTML = `
+            <div class="mb-8 border-b border-gray-100 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-black mb-1">Usuarios</h2>
+                    <p class="text-sm text-gray-400 font-medium">${data.length} usuarios registrados en la plataforma.</p>
+                </div>
+                <button onclick="abrirModalRegistro()" class="bg-navy_dark text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-brand_lime hover:text-navy_dark shadow-lg transition-all">+ Registrar usuario</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/50 border-b border-gray-100">
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Código</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Nombre</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Email</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Rol</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Registro</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        ${data.map(u => `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 font-black text-sm text-navy_dark">${u.codigo || "—"}</td>
+                                <td class="px-6 py-4 font-bold text-sm text-gray-600">${u.nombre || "—"}</td>
+                                <td class="px-6 py-4 text-xs font-semibold text-gray-500">${u.email || "—"}</td>
+                                <td class="px-6 py-4"><span class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wide ${badgeColorGlobal(u.rol)}">${badgeLabelGlobal(u.rol)}</span></td>
+                                <td class="px-6 py-4 text-xs font-bold text-gray-400">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}</td>
+                                <td class="px-6 py-4 text-right space-x-2">
+                                    <button onclick='abrirModalEditar("usuario","${u._id}",${JSON.stringify({ nombre: u.nombre, email: u.email, rol: u.rol }).replace(/'/g,"&#39;")})' class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">Editar</button>
+                                    <button onclick='abrirModalPassword("${u._id}","${u.nombre}")' class="bg-amber-50  px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-amber-100 transition-all">🔑</button>
+                                    <button onclick='abrirModalEliminar("usuario","${u._id}","${u.codigo || u.nombre}")' class="bg-red-50 text-red-500 px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-red-100 transition-all">Eliminar</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (e) {
+        c.innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar usuarios</p>";
+    }
+}
+
+// ======================
+// PRODUCTOS
+// ======================
+async function renderProductos() {
+    const c = document.getElementById("content");
+
+    try {
+        const res = await fetch(API_ADMIN + "/productos", { headers: { Authorization: "Bearer " + token } });
+        const data = await res.json();
+
+        c.innerHTML = `
+            <div class="mb-8 border-b border-gray-100 pb-6">
+                <h2 class="text-2xl font-black mb-1">Productos</h2>
+                <p class="text-sm text-gray-400 font-medium">Todos los productos registrados en el sistema.</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/50 border-b border-gray-100">
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Producto</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Agricultor</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Cantidad</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Precio/kg</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Ubicación</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Estado</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        ${data.map(p => `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 font-black text-sm text-navy_dark">${p.nombre}</td>
+                                <td class="px-6 py-4 font-bold text-sm text-gray-600">${p.agricultor?.nombre || "—"}</td>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-500">${p.cantidad} kg</td>
+                                <td class="px-6 py-4 font-black text-sm text-navy_dark">$${p.precioKg}</td>
+                                <td class="px-6 py-4 text-xs font-bold text-gray-500">${p.ubicacion}</td>
+                                <td class="px-6 py-4"><span class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wide ${badgeColorGlobal(p.estado)}">${badgeLabelGlobal(p.estado)}</span></td>
+                                <td class="px-6 py-4 text-right space-x-2">
+                                    <button onclick='abrirModalEditar("producto","${p._id}",${JSON.stringify({ nombre: p.nombre, precioKg: p.precioKg, estado: p.estado }).replace(/'/g,"&#39;")})' class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">Editar</button>
+                                    <button onclick='abrirModalEliminar("producto","${p._id}","${p.nombre}")' class="bg-red-50 text-red-500 px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-red-100 transition-all">Eliminar</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (e) {
+        c.innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar productos</p>";
+    }
+}
+
+// ======================
+// PEDIDOS
+// ======================
+async function renderPedidos() {
+    const c = document.getElementById("content");
+
+    try {
+        const res = await fetch(API_ADMIN + "/pedidos", { headers: { Authorization: "Bearer " + token } });
+        const data = await res.json();
+
+        c.innerHTML = `
+            <div class="mb-8 border-b border-gray-100 pb-6">
+                <h2 class="text-2xl font-black mb-1">Pedidos</h2>
+                <p class="text-sm text-gray-400 font-medium">Pedidos realizados en la plataforma.</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/50 border-b border-gray-100">
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">ID</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Producto</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Cantidad</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Comercio</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Agricultor</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Estado</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest"></th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        ${data.map(o => `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 text-xs font-mono font-bold text-gray-400">${o._id.slice(-6)}</td>
+                                <td class="px-6 py-4 font-black text-sm text-navy_dark">${o.producto?.nombre || "—"}</td>
+                                <td class="px-6 py-4 font-bold text-sm text-gray-600">${o.cantidad} kg</td>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-600">${o.comercio?.nombre || "—"}</td>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-600">${o.agricultor?.nombre || "—"}</td>
+                                <td class="px-6 py-4"><span class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wide ${badgeColorGlobal(o.estado)}">${badgeLabelGlobal(o.estado)}</span></td>
+                                <td class="px-6 py-4">${o.estado !== "pendiente" && o.estado !== "rechazado" ? `<button onclick="imprimirFacturaPedido('${o._id}')" class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">PDF</button>` : ""}</td>
+                                <td class="px-6 py-4 text-right space-x-2">
+                                    <button onclick='abrirModalEditar("pedido","${o._id}",${JSON.stringify({ estado: o.estado }).replace(/'/g,"&#39;")})' class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">Editar</button>
+                                    <button onclick='abrirModalEliminar("pedido","${o._id}","${o._id.slice(-6)}")' class="bg-red-50 text-red-500 px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-red-100 transition-all">Eliminar</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (e) {
+        c.innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar pedidos</p>";
+    }
+}
+
+// ======================
+// CONTRATOS
+// ======================
+let contratoDetalleId = null;
+
+async function renderContratos() {
+    const c = document.getElementById("content");
+    if (contratoDetalleId) { renderContratoDetalle(contratoDetalleId); return; }
+
+    try {
+        const res = await fetch(API_ADMIN + "/contratos", { headers: { Authorization: "Bearer " + token } });
+        const data = await res.json();
+
+        c.innerHTML = `
+            <div class="mb-8 border-b border-gray-100 pb-6">
+                <h2 class="text-2xl font-black mb-1">Contratos</h2>
+                <p class="text-sm text-gray-400 font-medium">Contratos de compraventa registrados.</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/50 border-b border-gray-100">
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Código</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Producto</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Comercio</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Agricultor</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Cantidad</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Estado</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest"></th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        ${data.map(c => `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 font-black text-sm text-navy_dark">${c.codigo}</td>
+                                <td class="px-6 py-4 font-bold text-sm text-gray-600">${c.nombreProducto}</td>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-600">${c.comercio?.nombre || "—"}</td>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-600">${c.agricultor?.nombre || "—"}</td>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-500">${c.cantidadKg} kg</td>
+                                <td class="px-6 py-4"><span class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wide ${badgeColorGlobal(c.estado)}">${badgeLabelGlobal(c.estado)}</span></td>
+                                <td class="px-6 py-4 space-x-1">
+                                    <button onclick="contratoDetalleId='${c._id}'; renderContratos();" class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">Ver</button>
+                                    <button onclick="imprimirContratoAdmin('${c._id}')" class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">PDF</button>
+                                </td>
+                                <td class="px-6 py-4 text-right space-x-2">
+                                    <button onclick='abrirModalEditar("contrato","${c._id}",${JSON.stringify({ estado: c.estado, precioAcordado: c.precioAcordado }).replace(/'/g,"&#39;")})' class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">Editar</button>
+                                    <button onclick='abrirModalEliminar("contrato","${c._id}","${c.codigo}")' class="bg-red-50 text-red-500 px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-red-100 transition-all">Eliminar</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (e) {
+        c.innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar contratos</p>";
+    }
+}
+
+async function renderContratoDetalle(id) {
+    const c = document.getElementById("content");
+
+    try {
+        const res = await fetch(API_CONTRACTS + "/" + id, { headers: { Authorization: "Bearer " + token } });
+        const ct = await res.json();
+
+        c.innerHTML = `
+            <button onclick="contratoDetalleId=null; renderContratos();" class="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-navy_dark transition-all mb-6 block">&larr; Volver a contratos</button>
+            <div class="bg-gray-50 border border-gray-100 p-8 rounded-[24px]">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="text-2xl font-black text-navy_dark">${ct.codigo}</h3>
+                        <p class="text-sm text-gray-400 font-bold">${ct.nombreProducto}</p>
+                    </div>
+                    <span class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wide ${badgeColorGlobal(ct.estado)}">${badgeLabelGlobal(ct.estado)}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Comercio</p><p class="font-black text-navy_dark">${ct.comercio?.nombre || "—"}</p></div>
+                    <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Agricultor</p><p class="font-black text-navy_dark">${ct.agricultor?.nombre || "—"}</p></div>
+                    <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Cantidad</p><p class="font-black text-navy_dark">${ct.cantidadKg} kg</p></div>
+                    <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Precio</p><p class="font-black text-navy_dark">$${ct.precioAcordado}/kg</p></div>
+                    <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total</p><p class="font-black text-brand_lime_dark">$${(ct.cantidadKg * ct.precioAcordado).toFixed(2)}</p></div>
+                    <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Entrega</p><p class="font-black text-navy_dark">${new Date(ct.fechaEntrega).toLocaleDateString()}</p></div>
+                </div>
+                ${ct.token ? `<div class="mt-6 p-4 bg-white border border-gray-100 rounded-2xl"><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Token Asociado</p><p class="font-black text-navy_dark">${ct.token.codigo} — ${ct.token.cantidad} kg</p></div>` : ""}
+                ${ct.historial?.length ? `
+                    <details class="mt-6">
+                        <summary class="text-[10px] font-black text-gray-400 uppercase tracking-widest cursor-pointer hover:text-navy_dark">Historial (${ct.historial.length})</summary>
+                        <div class="mt-3 space-y-1 bg-white p-4 rounded-2xl border border-gray-100">${ct.historial.map(h => `<p class="text-xs text-gray-400 font-bold">${h.accion} — ${new Date(h.fecha).toLocaleString()}</p>`).join("")}</div>
+                    </details>` : ""}
+                <div class="flex gap-3 mt-8">
+                    <button onclick="imprimirContratoAdmin('${ct._id}')" class="bg-navy_dark text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-brand_lime hover:text-navy_dark shadow-lg transition-all">🖨️ PDF</button>
+                    ${ct.estado !== "finalizado" && ct.estado !== "cancelado" && ct.estado !== "rechazado" ? `<button onclick="adminCancelarContrato('${ct._id}')" class="bg-red-50 text-red-500 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-100 transition-all">Cancelar contrato</button>` : ""}
+                </div>
+            </div>
+        `;
+    } catch (e) {
+        c.innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar contrato</p>";
+    }
+}
+
+async function adminCancelarContrato(id) {
+    if (!confirm("¿Cancelar este contrato? Esta acción no se puede deshacer.")) return;
+    const res = await fetch(`${API_CONTRACTS}/${id}/cancelar`, {
+        method: "PUT", headers: { Authorization: "Bearer " + token }
+    });
+    if (!res.ok) { const d = await res.json(); alert(d.message); return; }
+    alert("Contrato cancelado");
+    renderContratoDetalle(id);
+}
+
+// ======================
+// TOKENS
+// ======================
+async function renderTokens() {
+    const c = document.getElementById("content");
+
+    try {
+        const res = await fetch(API_ADMIN + "/tokens", { headers: { Authorization: "Bearer " + token } });
+        const data = await res.json();
+
+        c.innerHTML = `
+            <div class="mb-8 border-b border-gray-100 pb-6">
+                <h2 class="text-2xl font-black mb-1">Tokens</h2>
+                <p class="text-sm text-gray-400 font-medium">Tokens generados en la plataforma.</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/50 border-b border-gray-100">
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Código</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Activo</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Cantidad</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Propietario</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Estado</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Financiado</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Origen</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        ${data.map(t => `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 font-black text-sm text-navy_dark">${t.codigo}</td>
+                                <td class="px-6 py-4 font-bold text-sm text-gray-600">${t.nombreActivo}</td>
+                                <td class="px-6 py-4 font-bold text-sm text-gray-500">${t.cantidad} kg</td>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-600">${t.propietario?.nombre || "—"}</td>
+                                <td class="px-6 py-4"><span class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wide ${badgeColorGlobal(t.estado)}">${badgeLabelGlobal(t.estado)}</span></td>
+                                <td class="px-6 py-4 text-sm font-bold ${t.financiado ? "text-green-600" : "text-gray-400"}">${t.financiado ? "Sí" : "—"}</td>
+                                <td class="px-6 py-4 text-xs font-bold text-gray-500">${t.producto ? "Producto" : t.contrato ? "Contrato" : "—"}</td>
+                                <td class="px-6 py-4 text-right space-x-2">
+                                    <button onclick='abrirModalEditar("token","${t._id}",${JSON.stringify({ estado: t.estado, nombreActivo: t.nombreActivo, financiado: t.financiado }).replace(/'/g,"&#39;")})' class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">Editar</button>
+                                    <button onclick='abrirModalEliminar("token","${t._id}","${t.codigo}")' class="bg-red-50 text-red-500 px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-red-100 transition-all">Eliminar</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (e) {
+        c.innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar tokens</p>";
+    }
+}
+
+// ======================
+// VIAJES
+// ======================
+async function renderViajes() {
+    const c = document.getElementById("content");
+
+    try {
+        const res = await fetch(API_ADMIN + "/viajes", { headers: { Authorization: "Bearer " + token } });
+        const data = await res.json();
+
+        c.innerHTML = `
+            <div class="mb-8 border-b border-gray-100 pb-6">
+                <h2 class="text-2xl font-black mb-1">Viajes</h2>
+                <p class="text-sm text-gray-400 font-medium">Viajes de transporte registrados.</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/50 border-b border-gray-100">
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Código</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Ruta</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Carga</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Pago</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Transportista</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Agricultor</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Estado</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest"></th>
+                            <th class="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        ${data.map(t => `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 font-black text-sm text-navy_dark">${t.codigo}</td>
+                                <td class="px-6 py-4 font-bold text-sm text-gray-600">${t.origen} → ${t.destino}</td>
+                                <td class="px-6 py-4 font-bold text-sm text-gray-500">${t.cargaTotalKg} kg</td>
+                                <td class="px-6 py-4 font-black text-sm text-navy_dark">$${t.pago}</td>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-600">${t.transportista?.nombre || "—"}</td>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-600">${t.agricultor?.nombre || "—"}</td>
+                                <td class="px-6 py-4"><span class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wide ${badgeColorGlobal(t.estado)}">${badgeLabelGlobal(t.estado)}</span></td>
+                                <td class="px-6 py-4"><button onclick="imprimirViajeAdmin('${t._id}')" class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">PDF</button></td>
+                                <td class="px-6 py-4 text-right space-x-2">
+                                    <button onclick='abrirModalEditar("viaje","${t._id}",${JSON.stringify({ estado: t.estado, pago: t.pago }).replace(/'/g,"&#39;")})' class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">Editar</button>
+                                    <button onclick='abrirModalEliminar("viaje","${t._id}","${t.codigo}")' class="bg-red-50 text-red-500 px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-red-100 transition-all">Eliminar</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (e) {
+        c.innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar viajes</p>";
+    }
+}
+
+// ======================
+// FINANCIAMIENTOS
+// ======================
+async function renderFinanciamientos() {
+    const c = document.getElementById("content");
+    c.innerHTML = `
+        <div class="mb-8 border-b border-gray-100 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-black mb-1">Financiamientos</h2>
+                <p class="text-sm text-gray-400 font-medium">Solicitudes de financiamiento.</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="filtrarFin()" class="bg-gray-100 text-navy_dark px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Todos</button>
+                <button onclick="filtrarFin('pendiente')" class="bg-yellow-100 text-yellow-700 px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-200 transition-all">Pendientes</button>
+                <button onclick="filtrarFin('aprobado')" class="bg-green-100 text-green-700 px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-green-200 transition-all">Aprobados</button>
+                <button onclick="filtrarFin('rechazado')" class="bg-red-100 text-red-700 px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-200 transition-all">Rechazados</button>
+            </div>
+        </div>
+        <div id="finContent"><div class="flex justify-center items-center h-32"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand_lime"></div></div></div>
+    `;
+    filtrarFin();
+}
+
+async function filtrarFin(estado) {
+    const container = document.getElementById("finContent");
+    const url = estado ? API_ADMIN + "/financiamientos?estado=" + estado : API_ADMIN + "/financiamientos";
+
+    try {
+        const res = await fetch(url, { headers: { Authorization: "Bearer " + token } });
+        const data = await res.json();
+
+        if (!data.length) {
+            container.innerHTML = "<div class='bg-gray-50 rounded-[20px] p-8 text-center border border-dashed border-gray-200'><p class='text-gray-400 font-bold text-sm'>No hay resultados</p></div>";
+            return;
+        }
+
+        container.innerHTML = data.map(f => {
+            const badgeCls = f.estado === "aprobado" ? "bg-green-100 text-green-700 border border-green-200"
+                : f.estado === "rechazado" ? "bg-red-100 text-red-700 border border-red-200"
+                : f.estado === "pagado" ? "bg-blue-100 text-blue-700 border border-blue-200"
+                : "bg-yellow-100 text-yellow-700 border border-yellow-200";
+
+            return `
+                <div class="bg-gray-50 border border-gray-100 p-6 rounded-[24px] mb-4">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="font-black text-navy_dark text-sm">${f.agricultor?.nombre || "—"} (${f.agricultor?.codigo || "—"})</p>
+                            <p class="text-xs font-bold text-gray-500 mt-1">Token: ${f.token?.codigo || "—"} — ${f.token?.producto?.nombre || f.token?.contrato?.nombreProducto || "—"}</p>
+                        </div>
+                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wide ${badgeCls}">${badgeLabelGlobal(f.estado)}</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Valor Estimado</p><p class="font-black text-navy_dark">$${f.valorEstimado}</p></div>
+                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Solicitado</p><p class="font-black text-navy_dark">$${f.montoSolicitado}</p></div>
+                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Plazo</p><p class="font-black text-navy_dark">${f.plazoDias} días</p></div>
+                    </div>
+                    <div class="flex gap-2">
+                        ${f.estado === "pendiente" ? `
+                            <button onclick="aprobarFin('${f._id}')" class="bg-green-100 text-green-700 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-green-200 transition-all">Aprobar</button>
+                            <button onclick="rechazarFin('${f._id}')" class="bg-red-100 text-red-700 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-200 transition-all">Rechazar</button>
+                        ` : ""}
+                        <button onclick="imprimirFinanciamientoAdmin('${f._id}')" class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">PDF</button>
+                        <button onclick='abrirModalEditar("financiamiento","${f._id}",${JSON.stringify({ estado: f.estado, montoSolicitado: f.montoSolicitado, plazoDias: f.plazoDias }).replace(/'/g,"&#39;")})' class="bg-gray-100 text-navy_dark px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gray-200 transition-all">Editar</button>
+                        <button onclick='abrirModalEliminar("financiamiento","${f._id}","${f._id.slice(-6)}")' class="bg-red-50 text-red-500 px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-red-100 transition-all">Eliminar</button>
+                    </div>
+                    ${f.historial?.length ? `
+                        <details class="mt-4">
+                            <summary class="text-[10px] font-black text-gray-400 uppercase tracking-widest cursor-pointer hover:text-navy_dark">Historial (${f.historial.length})</summary>
+                            <div class="mt-2 space-y-1 bg-white p-4 rounded-2xl border border-gray-100">${f.historial.map(h => `<p class="text-xs text-gray-400 font-bold">${h.accion} — ${new Date(h.fecha).toLocaleString()}</p>`).join("")}</div>
+                        </details>` : ""}
+                </div>
+            `;
+        }).join("");
+    } catch (e) {
+        container.innerHTML = "<p class='text-danger font-bold bg-red-50 p-4 rounded-2xl'>Error al cargar</p>";
+    }
+}
+
+async function aprobarFin(id) {
+    if (!confirm("¿Aprobar este financiamiento?")) return;
+    const res = await fetch(`${API_FINANCING}/${id}/aprobar`, { method: "PUT", headers: { Authorization: "Bearer " + token } });
+    if (!res.ok) { const d = await res.json(); alert(d.message); return; }
+    alert("Financiamiento aprobado");
+    navigate("Financiamientos");
+}
+
+async function rechazarFin(id) {
+    if (!confirm("¿Rechazar este financiamiento?")) return;
+    const res = await fetch(`${API_FINANCING}/${id}/rechazar`, { method: "PUT", headers: { Authorization: "Bearer " + token } });
+    if (!res.ok) { const d = await res.json(); alert(d.message); return; }
+    alert("Financiamiento rechazado");
+    navigate("Financiamientos");
+}
+
+// ======================
+// PERFIL
+// ======================
+function renderPerfil() {
+    const c = document.getElementById("content");
+    c.innerHTML = `
+        <div class="mb-8 border-b border-gray-100 pb-6">
+            <h2 class="text-2xl font-black mb-1">Perfil</h2>
+            <p class="text-sm text-gray-400 font-medium">Información de tu cuenta.</p>
+        </div>
+        <div class="bg-gray-50 border border-gray-100 p-8 rounded-[24px] max-w-lg">
+            <p class="text-2xl font-black text-navy_dark mb-4">${user.nombre || "—"}</p>
+            <div class="space-y-3">
+                <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Código</p><p class="font-black text-navy_dark">${user.codigo || "—"}</p></div>
+                <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Email</p><p class="font-bold text-gray-600">${user.email || "—"}</p></div>
+                <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Rol</p><span class="inline-block px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wide ${badgeColorGlobal(user.rol)}">${badgeLabelGlobal(user.rol)}</span></div>
+            </div>
+        </div>
+    `;
+}
+
+// ======================
+// EDITAR (MODAL GENÉRICO)
+// ======================
+let editando = { tipo: null, id: null };
+
+function abrirModalEditar(tipo, id, data) {
+    editando = { tipo, id };
+    const m = document.getElementById("editModal");
+    document.getElementById("editTitulo").innerText = `Editar ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
+    const body = document.getElementById("editBody");
+    let html = "";
+
+    const makeField = (label, name, value, type = "text", isSelect = false, opts = null) => {
+        const baseInput = 'w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 px-4 focus:border-brand_lime outline-none font-bold text-navy_dark';
+        const baseLabel = 'text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block';
+        if (isSelect) {
+            return `<div class="mb-4"><label class="${baseLabel}">${label}</label>
+                <select id="ef_${name}" class="${baseInput}">${opts.map(o => `<option value="${o}" ${value === o ? "selected" : ""}>${o}</option>`).join("")}</select></div>`;
+        }
+        return `<div class="mb-4"><label class="${baseLabel}">${label}</label>
+            <input type="${type}" id="ef_${name}" value="${value ?? ""}" class="${baseInput}"></div>`;
+    };
+
+    switch (tipo) {
+        case "usuario":
+            html += makeField("Nombre", "nombre", data.nombre);
+            html += makeField("Email", "email", data.email, "email");
+            html += makeField("Rol", "rol", data.rol, "text", true, ["agricultor", "comercio", "transportista", "admin"]);
+            break;
+        case "producto":
+            html += makeField("Nombre", "nombre", data.nombre);
+            html += makeField("Precio/kg", "precioKg", data.precioKg, "number");
+            html += makeField("Estado", "estado", data.estado, "text", true, ["disponible", "vendido"]);
+            break;
+        case "pedido":
+            html += makeField("Estado", "estado", data.estado, "text", true, ["pendiente", "aceptado", "rechazado", "en_transporte", "entregado", "cancelado"]);
+            break;
+        case "contrato":
+            html += makeField("Estado", "estado", data.estado, "text", true, ["pendiente", "activo", "en_produccion", "en_transporte", "entregado", "finalizado", "rechazado", "cancelado"]);
+            html += makeField("Precio acordado", "precioAcordado", data.precioAcordado, "number");
+            break;
+        case "token":
+            html += makeField("Estado", "estado", data.estado, "text", true, ["Disponible", "Vendido", "Transferido", "Dividido", "Cancelado"]);
+            html += makeField("Nombre activo", "nombreActivo", data.nombreActivo);
+            html += `<div class="mb-4 flex items-center gap-3"><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Financiado</label>
+                <input type="checkbox" id="ef_financiado" ${data.financiado ? "checked" : ""} class="w-5 h-5 rounded border-gray-300 accent-brand_lime"></div>`;
+            break;
+        case "viaje":
+            html += makeField("Estado", "estado", data.estado, "text", true, ["pendiente", "asignado", "carga_recogida", "en_camino", "llegó_a_destino", "entregado", "cancelado"]);
+            html += makeField("Pago ($)", "pago", data.pago, "number");
+            break;
+        case "financiamiento":
+            html += makeField("Estado", "estado", data.estado, "text", true, ["pendiente", "aprobado", "rechazado", "pagado"]);
+            html += makeField("Monto solicitado", "montoSolicitado", data.montoSolicitado, "number");
+            html += makeField("Plazo (días)", "plazoDias", data.plazoDias, "number");
+            break;
+    }
+    body.innerHTML = html;
+    m.classList.remove("hidden");
+}
+
+function cerrarModalEditar() {
+    document.getElementById("editModal").classList.add("hidden");
+    editando = { tipo: null, id: null };
+}
+
+async function confirmarEditar() {
+    const { tipo, id } = editando;
+    if (!tipo || !id) return;
+
+    const body = {};
+    const fields = document.querySelectorAll("#editBody [id^='ef_']");
+    fields.forEach(el => {
+        const name = el.id.replace("ef_", "");
+        if (el.type === "checkbox") {
+            body[name] = el.checked;
+        } else if (el.type === "number") {
+            body[name] = parseFloat(el.value);
+        } else {
+            body[name] = el.value;
+        }
+    });
+
+    const res = await fetch(`${API_ADMIN}/${tipo}s/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+        body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) { alert(data.message); return; }
+    alert("Actualizado correctamente");
+    cerrarModalEditar();
+    navigate(document.getElementById("sectionTitle").innerText);
+}
+
+// ======================
+// ELIMINAR (MODAL CONFIRMACIÓN)
+// ======================
+let eliminando = { tipo: null, id: null };
+
+function abrirModalEliminar(tipo, id, nombre) {
+    eliminando = { tipo, id };
+    const m = document.getElementById("deleteModal");
+    document.getElementById("deleteMsg").innerHTML = `¿Eliminar <b>${nombre}</b>? Esta acción no se puede deshacer.`;
+    document.getElementById("deleteWarning").classList.add("hidden");
+    document.getElementById("deleteCheck").checked = false;
+    document.getElementById("deleteBtn").disabled = true;
+    m.classList.remove("hidden");
+}
+
+function cerrarModalEliminar() {
+    document.getElementById("deleteModal").classList.add("hidden");
+    eliminando = { tipo: null, id: null };
+}
+
+function toggleDeleteBtn() {
+    document.getElementById("deleteBtn").disabled = !document.getElementById("deleteCheck").checked;
+}
+
+async function confirmarEliminar() {
+    const { tipo, id } = eliminando;
+    if (!tipo || !id) return;
+
+    const res = await fetch(`${API_ADMIN}/${tipo}s/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: "Bearer " + token }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        alert(data.message);
+        if (data.pedidosActivos || data.tokensActivos) {
+            document.getElementById("deleteWarning").innerHTML = `<p class="text-danger font-bold bg-red-50 p-4 rounded-2xl text-sm">⚠️ Tiene ${data.pedidosActivos || 0} pedido(s) activo(s) y ${data.tokensActivos || 0} token(s) activo(s). No se puede eliminar.</p>`;
+            document.getElementById("deleteWarning").classList.remove("hidden");
+        }
+        return;
+    }
+
+    let msg = data.message;
+    if (data.dependencias) {
+        const dep = data.dependencias;
+        const partes = [];
+        if (dep.productos) partes.push(`${dep.productos} producto(s)`);
+        if (dep.pedidos) partes.push(`${dep.pedidos} pedido(s)`);
+        if (dep.contratos) partes.push(`${dep.contratos} contrato(s)`);
+        if (dep.tokens) partes.push(`${dep.tokens} token(s)`);
+        if (partes.length) msg += ` — Dependencias activas: ${partes.join(", ")}`;
+    }
+    alert(msg);
+    cerrarModalEliminar();
+    navigate(document.getElementById("sectionTitle").innerText);
+}
+
+// ======================
+// CAMBIAR CONTRASEÑA
+// ======================
+let passUserId = null;
+
+function abrirModalPassword(id, nombre) {
+    passUserId = id;
+    document.getElementById("passTitulo").innerText = `Cambiar contraseña — ${nombre}`;
+    document.getElementById("passNew").value = "";
+    document.getElementById("passConfirm").value = "";
+    document.getElementById("passwordModal").classList.remove("hidden");
+}
+
+function cerrarModalPassword() {
+    document.getElementById("passwordModal").classList.add("hidden");
+    passUserId = null;
+}
+
+async function confirmarPassword() {
+    const pw = document.getElementById("passNew").value;
+    const pw2 = document.getElementById("passConfirm").value;
+    if (!pw || pw.length < 4) { alert("La contraseña debe tener al menos 4 caracteres"); return; }
+    if (pw !== pw2) { alert("Las contraseñas no coinciden"); return; }
+
+    const res = await fetch(`${API_ADMIN}/usuarios/${passUserId}/password`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+        body: JSON.stringify({ password: pw })
+    });
+    const data = await res.json();
+    if (!res.ok) { alert(data.message); return; }
+    alert("Contraseña actualizada");
+    cerrarModalPassword();
+}
+
+// ======================
+// REGISTRAR USUARIO (ADMIN)
+// ======================
+function abrirModalRegistro() {
+    document.getElementById("registroModal").classList.remove("hidden");
+    document.getElementById("regNombre").value = "";
+    document.getElementById("regEmail").value = "";
+    document.getElementById("regPassword").value = "";
+    document.getElementById("regRol").value = "agricultor";
+}
+
+function cerrarModalRegistro() {
+    document.getElementById("registroModal").classList.add("hidden");
+}
+
+async function confirmarRegistro() {
+    const nombre = document.getElementById("regNombre").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const password = document.getElementById("regPassword").value;
+    const rol = document.getElementById("regRol").value;
+
+    if (!nombre || !email || !password) {
+        alert("Completa todos los campos");
+        return;
+    }
+
+    const res = await fetch("http://localhost:3000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, email, password, rol })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        alert(data.message);
+        return;
+    }
+
+    alert("Usuario " + data.user.codigo + " (" + rol + ") creado exitosamente");
+    cerrarModalRegistro();
+    navigate("Usuarios");
+}
+
+// ======================
+// PDF
+// ======================
+function printDocument(titulo, bodyHtml) {
+    const userData = JSON.parse(localStorage.getItem("user") || "{}");
+    const now = new Date().toLocaleString();
+    const css = `
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #1a1a1a; padding: 40px; }
+        .header { text-align: center; border-bottom: 3px solid #166534; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { color: #166534; font-size: 24px; }
+        .header p { color: #666; font-size: 12px; }
+        .doc-title { font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 25px; color: #166534; }
+        .section { margin-bottom: 20px; }
+        .section-title { font-weight: bold; font-size: 14px; color: #166534; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        td, th { padding: 6px 8px; text-align: left; font-size: 13px; }
+        th { background: #f0fdf4; color: #166534; font-weight: bold; }
+        .row-label { font-weight: bold; color: #444; width: 140px; }
+        .total-row td { font-weight: bold; border-top: 2px solid #166534; }
+        .firma { margin-top: 50px; display: flex; justify-content: space-between; }
+        .firma div { text-align: center; width: 200px; }
+        .firma .line { border-top: 1px solid #333; margin-top: 40px; padding-top: 5px; font-size: 12px; }
+        .footer { margin-top: 40px; text-align: center; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 15px; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; }
+        .badge-verde { background: #166534; }
+        .badge-amarillo { background: #ca8a04; }
+        .badge-rojo { background: #dc2626; }
+        .badge-azul { background: #2563eb; }
+        .badge-morado { background: #7c3aed; }
+    </style>`;
+    const win = window.open("", "_blank");
+    win.document.write(`
+        <!DOCTYPE html>
+        <html><head><meta charset="UTF-8"><title>${titulo}</title>${css}</head>
+        <body>
+            <div class="header"><h1>CosechaDirecta</h1><p>Plataforma de Comercio Agrícola</p></div>
+            <div class="doc-title">${titulo}</div>
+            ${bodyHtml}
+            <div class="footer"><p>Documento generado el ${now} por ${userData.nombre || "—"} (${userData.codigo || "—"})</p><p>CosechaDirecta &copy; ${new Date().getFullYear()}</p></div>
+        </body></html>
+    `);
+    win.document.close();
+    setTimeout(() => { win.focus(); win.print(); }, 300);
+}
+
+function imprimirFacturaPedido(orderId) {
+    fetch(API_ADMIN + "/pedidos", { headers: { Authorization: "Bearer " + token } })
+    .then(r => r.json())
+    .then(all => {
+        const o = all.find(x => x._id === orderId);
+        if (!o) return;
+        const total = o.cantidad * (o.producto?.precioKg || 0);
+        printDocument("Factura del Pedido", `
+            <div class="section"><table>
+                <tr><td class="row-label">Factura:</td><td><b>FAC-${o._id.slice(-6).toUpperCase()}</b></td></tr>
+                <tr><td class="row-label">Fecha:</td><td>${new Date().toLocaleDateString()}</td></tr>
+                <tr><td class="row-label">Estado:</td><td>${o.estado}</td></tr>
+            </table></div>
+            <div class="section"><div class="section-title">Partes</div><table>
+                <tr><td class="row-label">Vendedor:</td><td>${o.agricultor?.nombre || "—"}</td></tr>
+                <tr><td class="row-label">Comprador:</td><td>${o.comercio?.nombre || "—"}</td></tr>
+            </table></div>
+            <div class="section"><div class="section-title">Detalle</div><table>
+                <tr><th>Producto</th><th>Cantidad</th><th>Precio/kg</th><th>Subtotal</th></tr>
+                <tr><td>${o.producto?.nombre || "—"}</td><td>${o.cantidad} kg</td><td>$${o.producto?.precioKg || 0}</td><td>$${total.toFixed(2)}</td></tr>
+                <tr class="total-row"><td colspan="3">TOTAL</td><td>$${total.toFixed(2)}</td></tr>
+            </table></div>
+            ${o.viaje ? `<div class="section"><div class="section-title">Transporte</div><table><tr><td class="row-label">Viaje:</td><td>${o.viaje.codigo || "—"}</td></tr><tr><td class="row-label">Ruta:</td><td>${o.viaje.origen || "—"} → ${o.viaje.destino || "—"}</td></tr></table></div>` : ""}
+            <div class="firma"><div><div class="line">Vendedor</div></div><div><div class="line">Comprador</div></div></div>
+        `);
+    });
+}
+
+function imprimirContratoAdmin(cid) {
+    fetch(API_CONTRACTS + "/" + cid, { headers: { Authorization: "Bearer " + token } })
+    .then(r => r.json())
+    .then(c => {
+        const total = c.cantidadKg * c.precioAcordado;
+        printDocument("Contrato de Compraventa", `
+            <div class="section"><table>
+                <tr><td class="row-label">Contrato:</td><td><b>${c.codigo}</b></td></tr>
+                <tr><td class="row-label">Fecha:</td><td>${new Date(c.createdAt || c._id?.getTimestamp?.()).toLocaleDateString() || new Date().toLocaleDateString()}</td></tr>
+                <tr><td class="row-label">Estado:</td><td>${c.estado}</td></tr>
+            </table></div>
+            <div class="section"><div class="section-title">Partes</div><table>
+                <tr><td class="row-label">Comprador:</td><td>${c.comercio?.nombre || "—"}</td></tr>
+                <tr><td class="row-label">Vendedor:</td><td>${c.agricultor?.nombre || "—"}</td></tr>
+            </table></div>
+            <div class="section"><div class="section-title">Detalle</div><table>
+                <tr><td class="row-label">Producto:</td><td>${c.nombreProducto}</td></tr>
+                <tr><td class="row-label">Cantidad:</td><td>${c.cantidadKg} kg</td></tr>
+                <tr><td class="row-label">Precio:</td><td>$${c.precioAcordado}/kg</td></tr>
+                <tr class="total-row"><td>Total:</td><td>$${total.toFixed(2)}</td></tr>
+                <tr><td class="row-label">Entrega:</td><td>${new Date(c.fechaEntrega).toLocaleDateString()}</td></tr>
+            </table></div>
+            ${c.token ? `<div class="section"><div class="section-title">Token</div><table><tr><td class="row-label">Código:</td><td>${c.token.codigo}</td></tr><tr><td class="row-label">Cantidad:</td><td>${c.token.cantidad} kg</td></tr></table></div>` : ""}
+            ${c.historial?.length ? `<div class="section"><div class="section-title">Historial</div><table>${c.historial.map(h => `<tr><td>${new Date(h.fecha).toLocaleString()}</td><td>${h.accion}</td></tr>`).join("")}</table></div>` : ""}
+            <div class="firma"><div><div class="line">Comprador</div></div><div><div class="line">Vendedor</div></div></div>
+        `);
+    });
+}
+
+function imprimirFinanciamientoAdmin(finId) {
+    fetch(API_ADMIN + "/financiamientos", { headers: { Authorization: "Bearer " + token } })
+    .then(r => r.json())
+    .then(all => {
+        const f = all.find(x => x._id === finId);
+        if (!f) return;
+        const totalPagar = f.montoSolicitado + (f.montoSolicitado * (f.interes || 5) / 100);
+        printDocument("Comprobante de Financiamiento", `
+            <div class="section"><table>
+                <tr><td class="row-label">Comprobante:</td><td><b>FIN-${f._id.slice(-6).toUpperCase()}</b></td></tr>
+                <tr><td class="row-label">Fecha:</td><td>${new Date(f.createdAt || f._id?.getTimestamp?.()).toLocaleDateString() || new Date().toLocaleDateString()}</td></tr>
+                <tr><td class="row-label">Estado:</td><td>${f.estado}</td></tr>
+            </table></div>
+            <div class="section"><div class="section-title">Solicitante</div><table><tr><td class="row-label">Agricultor:</td><td>${f.agricultor?.nombre || "—"} (${f.agricultor?.codigo || "—"})</td></tr></table></div>
+            <div class="section"><div class="section-title">Activo</div><table>
+                <tr><td class="row-label">Token:</td><td>${f.token?.codigo || "—"}</td></tr>
+                <tr><td class="row-label">Valor estimado:</td><td>$${f.valorEstimado}</td></tr>
+            </table></div>
+            <div class="section"><div class="section-title">Financiamiento</div><table>
+                <tr><td class="row-label">Monto:</td><td>$${f.montoSolicitado}</td></tr>
+                <tr><td class="row-label">Plazo:</td><td>${f.plazoDias} días</td></tr>
+                <tr><td class="row-label">Interés:</td><td>${f.interes}%</td></tr>
+                <tr class="total-row"><td>Total a pagar:</td><td>$${totalPagar.toFixed(2)}</td></tr>
+            </table></div>
+        `);
+    });
+}
+
+function imprimirViajeAdmin(tripId) {
+    fetch(API_ADMIN + "/viajes", { headers: { Authorization: "Bearer " + token } })
+    .then(r => r.json())
+    .then(all => {
+        const t = all.find(x => x._id === tripId);
+        if (!t) return;
+        printDocument("Comprobante de Viaje", `
+            <div class="section"><table>
+                <tr><td class="row-label">Viaje:</td><td><b>${t.codigo}</b></td></tr>
+                <tr><td class="row-label">Fecha:</td><td>${new Date(t.createdAt || t._id?.getTimestamp?.()).toLocaleDateString() || new Date().toLocaleDateString()}</td></tr>
+                <tr><td class="row-label">Estado:</td><td>${t.estado}</td></tr>
+            </table></div>
+            <div class="section"><div class="section-title">Ruta</div><table>
+                <tr><td class="row-label">Origen:</td><td>${t.origen || "—"}</td></tr>
+                <tr><td class="row-label">Destino:</td><td>${t.destino || "—"}</td></tr>
+                <tr><td class="row-label">Carga:</td><td>${t.cargaTotalKg} kg</td></tr>
+                <tr class="total-row"><td>Pago:</td><td>$${t.pago}</td></tr>
+            </table></div>
+            <div class="section"><div class="section-title">Participantes</div><table>
+                <tr><td class="row-label">Agricultor:</td><td>${t.agricultor?.nombre || "—"}</td></tr>
+                <tr><td class="row-label">Transportista:</td><td>${t.transportista?.nombre || "—"}</td></tr>
+            </table></div>
+            ${t.pedidos?.length ? `<div class="section"><div class="section-title">Pedidos</div><table><tr><th>Producto</th><th>Cantidad</th><th>Comercio</th></tr>${t.pedidos.map(p => `<tr><td>${p.producto?.nombre || "—"}</td><td>${p.cantidad} kg</td><td>${p.comercio?.nombre || "—"}</td></tr>`).join("")}</table></div>` : ""}
+            ${t.tracking?.length ? `<div class="section"><div class="section-title">Tracking</div><table><tr><th>Fecha</th><th>Estado</th><th>Ubicación</th></tr>${t.tracking.map(x => `<tr><td>${new Date(x.fecha).toLocaleString()}</td><td>${x.estado}</td><td>${x.ubicacion || "—"}</td></tr>`).join("")}</table></div>` : ""}
+            <div class="firma" style="justify-content:center"><div><div class="line">Transportista</div></div></div>
+        `);
+    });
+}
+
+// ======================
+// CERRAR SESIÓN
+// ======================
+function cerrarSesion() {
+    localStorage.clear();
+    window.location.href = "../index.html";
+}
+
+// ======================
+// INIT
+// ======================
+navigate("Dashboard");
+</script>
+
+</body>
+</html>

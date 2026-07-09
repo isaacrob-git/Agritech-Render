@@ -1,0 +1,46 @@
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const connectDB = require("./config/db");
+require("dotenv").config();
+
+const app = express();
+
+connectDB();
+
+app.use(express.static(path.join(__dirname, "..", "client")));
+
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ROUTES
+const authRoutes = require("./routes/authRoutes");
+app.use("/api/auth", authRoutes);
+
+const productRoutes = require("./routes/productRoutes");
+app.use("/api/products", productRoutes);
+
+const orderRoutes = require("./routes/orderRoutes");
+app.use("/api/orders", orderRoutes);
+
+const contractRoutes = require("./routes/contractRoutes");
+app.use("/api/contracts", contractRoutes);
+
+const assetTokenRoutes = require("./routes/assetTokenRoutes");
+app.use("/api/tokens", assetTokenRoutes);
+
+const financingRoutes = require("./routes/financingRoutes");
+app.use("/api/financiamiento", financingRoutes);
+
+const tripRoutes = require("./routes/tripRoutes");
+app.use("/api/trips", tripRoutes);
+
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/api/admin", adminRoutes);
+
+app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", message: "API CosechaDirecta funcionando" });
+});
+
+module.exports = app;
