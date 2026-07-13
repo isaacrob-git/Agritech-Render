@@ -1,4 +1,4 @@
-# AgriTech: CosechaDirecta
+﻿# AgriTech: CosechaDirecta
 
 **Plataforma B2B de Comercio Agrícola**
 
@@ -104,35 +104,61 @@ MongoDB (Mongoose ODM)
 ### Requisitos
 
 - Node.js 18+
-- MongoDB 7+ corriendo en `localhost:27017`
 - npm
+- Opcional: MongoDB 7+ local (solo si no usas MongoDB Atlas)
 
-### Pasos
+### 1. Clonar el repositorio
 
 ```bash
-# 1. Clonar el repositorio
 git clone <repo-url>
-cd CosechaDirecta
+cd Agritech
+```
 
-# 2. Instalar dependencias
+### 2. Instalar dependencias
+
+```bash
 cd server
 npm install
+```
 
-# 3. Configurar variables de entorno
-echo "JWT_SECRET=supersecreto123" > .env
+### 3. Configurar variables de entorno
 
-# 4. Iniciar MongoDB (si no está corriendo)
-mongod
+Dentro de `server/`, crea un archivo `.env`. Tienes dos opciones:
 
-# 5. Iniciar el servidor
+#### Opción A — Usar MongoDB Atlas (recomendado, no requiere instalar MongoDB)
+
+```env
+MONGODB_URI=mongodb+srv://<usuario>:<contraseña>@cluster0.xxxxx.mongodb.net/cosechadirecta?retryWrites=true&w=majority
+JWT_SECRET=supersecreto123
+```
+
+> Obtén el `MONGODB_URI` desde MongoDB Atlas → Connect → Drivers.
+> Asegúrate de agregar `0.0.0.0/0` en Network Access.
+
+#### Opción B — Usar MongoDB local
+
+```env
+JWT_SECRET=supersecreto123
+```
+
+> Si no incluyes `MONGODB_URI`, el servidor se conectará automáticamente a `mongodb://127.0.0.1:27017/cosechadirecta`.
+> Asegúrate de tener MongoDB corriendo (`mongod`).
+
+### 4. Iniciar el servidor
+
+```bash
 npm start
-# o con nodemon
-npm run dev
 ```
 
 El servidor se levanta en `http://localhost:3000`.
 
-> **Nota:** El frontend es HTML estático. Abre `client/index.html` en tu navegador o sírvelo con cualquier servidor estático.
+### 5. Acceder al frontend
+
+El frontend se sirve automáticamente desde el mismo servidor. Abre en tu navegador:
+
+```
+http://localhost:3000
+```
 
 ---
 
@@ -372,9 +398,7 @@ Alternativa: Contratos a futuro
 ## Autores
 
 Isaac Lara C.I: 28.408.847
-
 Edgarimar Malaspina C.I: 32.249.664
-
 Mariangela Pinto C.I: 23.952.199
 
 Sección "2"
