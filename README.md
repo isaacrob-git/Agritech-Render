@@ -398,8 +398,14 @@ Alternativa: Contratos a futuro
 ## Autores
 
 Isaac Lara C.I: 28.408.847
+
 Edgarimar Malaspina C.I: 32.249.664
+
 Mariangela Pinto C.I: 23.952.199
+
+Jesús Arnaudes C.I: 31.345.987
+
+Moises Requena C.I: 30.658.470
 
 Sección "2"
 
